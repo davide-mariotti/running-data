@@ -1,10 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Garmin Activity Converter - CSV + GPX -> JSON
-Produce: metadati attivita (dal GPX) + intertempi/riepilogo (dal CSV).
-Niente track points.
+Garmin Activity Converter - Genera un unico JSON con TUTTE le attivita di TUTTE le settimane
+============================================================
+UTILIZZO:
+  1. Nessuna configurazione necessaria: processa automaticamente tutte le cartelle
+     Wxx trovate in 2026-10-29-M/
+  2. Lancia lo script dalla root del progetto con:
+       python convert_all.py
+  3. Troverai il file di output in: output/all_activities.json
+
+  Il file contiene una lista piatta di tutte le attivita, ognuna con il
+  campo "week" per sapere a quale settimana appartiene.
+
+REQUISITI:
+  - Python 3.8+
+  - I file CSV e GPX delle attivita devono essere nelle cartelle:
+    2026-10-29-M/<WEEK_NAME>/activity_<ID>.csv  e  activity_<ID>.gpx
 """
+
 import io, sys
 if sys.stdout.encoding.lower() != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
@@ -46,8 +60,8 @@ CSV_KEY_MAP = {
     "Cadenza di corsa max pam":                            "cadenza_max_pam",
     "Tempo in movimento":                                  "tempo_in_movimento",
     "Passo medio in movimento min/km":                     "passo_medio_in_movimento",
-    "Perdita velocit\u00e0 di passo media cm/s":           "perdita_velocita_cms",
-    "Percentuale perdita velocit\u00e0 di passo media %":  "perdita_velocita_pct",
+    "Perdita velocità di passo media cm/s":                "perdita_velocita_cms",
+    "Percentuale perdita velocità di passo media %":       "perdita_velocita_pct",
 }
 
 def normalize_key(k: str) -> str:
@@ -116,83 +130,70 @@ def parse_gpx_meta(gpx_path: Path) -> dict:
     }
 
 
-# ── Elaborazione settimana ─────────────────────────────────────────────────────
-def process_week(week_dir: Path) -> list:
-    files_by_id = defaultdict(dict)
-    for f in week_dir.iterdir():
-        if not f.is_file():
-            continue
-        m = re.match(r"activity_(\d+)\.(csv|gpx)", f.name, re.IGNORECASE)
-        if m:
-            files_by_id[m.group(1)][m.group(2).lower()] = f
-
-    activities = []
-    for aid in sorted(files_by_id):
-        fmap = files_by_id[aid]
-        if "csv" not in fmap:
-            print(f"  ! {aid}: CSV mancante, skip")
-            continue
-        if "gpx" not in fmap:
-            print(f"  ! {aid}: GPX mancante, skip")
-            continue
-
-        print(f"  -> activity {aid}")
-        meta = parse_gpx_meta(fmap["gpx"])
-        csv_data = parse_csv(fmap["csv"])
-
-        activities.append({
-            "activity_id":    aid,
-            "name":           meta["name"],
-            "date":           meta["date"],
-            "start_time_utc": meta["start_time_utc"],
-            "start_time":     meta["start_time"],
-            "type":           meta["type"],
-            "laps":           csv_data["laps"],
-            "summary":        csv_data["summary"],
-        })
-
-    return activities
-
-
 # ── Main ───────────────────────────────────────────────────────────────────────
 def main():
     base_dir   = Path(__file__).parent / "2026-10-29-M"
     output_dir = Path(__file__).parent / "output"
     output_dir.mkdir(exist_ok=True)
 
-    all_weeks = []
     week_dirs = sorted(
         [d for d in base_dir.iterdir() if d.is_dir() and re.match(r"W\d+", d.name)],
         key=lambda d: int(d.name[1:])
     )
 
+    print(f"\n[START] Processo tutte le settimane...\n")
+
+    all_activities = []
+
     for week_dir in week_dirs:
         week_name = week_dir.name
-        activities = process_week(week_dir)
-        if not activities:
+
+        # Raggruppa i file CSV/GPX per activity ID
+        files_by_id = defaultdict(dict)
+        for f in week_dir.iterdir():
+            if not f.is_file():
+                continue
+            m = re.match(r"activity_(\d+)\.(csv|gpx)", f.name, re.IGNORECASE)
+            if m:
+                files_by_id[m.group(1)][m.group(2).lower()] = f
+
+        if not files_by_id:
             continue
 
-        print(f"  [W{week_dir.name[1:].zfill(2)}] {len(activities)} attivita")
+        week_count = 0
+        for aid in sorted(files_by_id):
+            fmap = files_by_id[aid]
+            if "csv" not in fmap or "gpx" not in fmap:
+                continue
 
-        week_obj = {
-            "week":           week_name,
-            "activity_count": len(activities),
-            "activities":     activities,
-        }
-        all_weeks.append(week_obj)
+            meta     = parse_gpx_meta(fmap["gpx"])
+            csv_data = parse_csv(fmap["csv"])
 
-        week_json = output_dir / f"{week_name}.json"
-        with open(week_json, "w", encoding="utf-8") as out:
-            json.dump(week_obj, out, ensure_ascii=False, indent=2)
-        print(f"  ✓  {week_json.name}")
+            all_activities.append({
+                "week":           week_name,
+                "activity_id":    aid,
+                "name":           meta["name"],
+                "date":           meta["date"],
+                "start_time_utc": meta["start_time_utc"],
+                "start_time":     meta["start_time"],
+                "type":           meta["type"],
+                "laps":           csv_data["laps"],
+                "summary":        csv_data["summary"],
+            })
+            week_count += 1
 
-    if all_weeks:
-        all_json = output_dir / "all_weeks.json"
-        with open(all_json, "w", encoding="utf-8") as out:
-            json.dump(all_weeks, out, ensure_ascii=False, indent=2)
-        print(f"\n[OK] all_weeks.json -> {all_json}")
-    else:
-        print("\n[!] Nessuna settimana con dati trovata.")
+        if week_count:
+            print(f"  [{week_name}] {week_count} attivita")
+
+    if not all_activities:
+        print("[!] Nessuna attivita trovata.")
+        sys.exit(1)
+
+    out_file = output_dir / "all_activities.json"
+    with open(out_file, "w", encoding="utf-8") as out:
+        json.dump(all_activities, out, ensure_ascii=False, indent=2)
+
+    print(f"\n[OK] {len(all_activities)} attivita totali -> {out_file}")
 
 
 if __name__ == "__main__":

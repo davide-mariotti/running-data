@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marathon Training Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <header class="header">
+            <h1>Training Dashboard</h1>
+            <p>Monitora i progressi e analizza i tuoi allenamenti verso la maratona.</p>
+        </header>
+
+        <main class="content">
+            <!-- Aggregate Data Section -->
+            <section class="card aggregate-card">
+                <div class="card-header">
+                    <h2>Trend Volume e Intensità</h2>
+                    <p class="subtitle">Distanza totale settimanale (km) e FC media</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="aggregateChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Weekly Detail Section -->
+            <section class="weekly-section">
+                <div class="weekly-controls">
+                    <h2>Dettaglio Settimanale</h2>
+                    <div class="custom-select">
+                        <select id="weekSelector">
+                            <!-- Options will be populated by JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="weekly-grid">
+                    <div class="card weekly-card">
+                        <div class="card-header">
+                            <h3>Volume per Attività</h3>
+                            <p class="subtitle">Distanza (km)</p>
+                        </div>
+                        <div class="chart-container-small">
+                            <canvas id="weeklyDistanceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card weekly-card">
+                        <div class="card-header">
+                            <h3>Intensità per Attività</h3>
+                            <p class="subtitle">Frequenza Cardiaca (Media e Max)</p>
+                        </div>
+                        <div class="chart-container-small">
+                            <canvas id="weeklyHrChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom JS -->
+    <script src="dashboard.js"></script>
+</body>
+</html>

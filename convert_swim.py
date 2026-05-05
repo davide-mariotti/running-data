@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Garmin Bike Activity Converter - Converte le uscite in bici in JSON
+Garmin Swim Activity Converter - Converte le uscite di nuoto in JSON
 ====================================================================
 UTILIZZO:
-  1. Metti i file CSV e GPX delle attività bici nella cartella:
-       bike/activity_<ID>.csv  e  activity_<ID>.gpx
+  1. Metti i file CSV e GPX delle attività di nuoto nella cartella:
+       swim/activity_<ID>.csv  e  activity_<ID>.gpx
   2. Lancia lo script dalla root del progetto con:
-       python convert_bike.py
-  3. Troverai i file di output in: output/bike/
-     - Un JSON per ogni attività: bike_activity_<ID>.json
-     - Un JSON aggregato con tutte le uscite: all_bike.json
+       python convert_swim.py
+  3. Troverai i file di output in: output/swim/
+     - Un JSON per ogni attività: swim_activity_<ID>.json
+     - Un JSON aggregato con tutte le uscite: all_swim.json
 
 REQUISITI:
   - Python 3.8+
-  - I file CSV e GPX devono essere nella cartella:  bike/
+  - I file CSV e GPX devono essere nella cartella:  swim/
 """
 
 # ── CONFIGURAZIONE ─────────────────────────────────────────────────────────────
-# Cartella sorgente contenente i file CSV e GPX delle attività bici
-BIKE_DIR = "bike"
+# Cartella sorgente contenente i file CSV e GPX delle attività di nuoto
+SWIM_DIR = "swim"
 # ───────────────────────────────────────────────────────────────────────────────
 
 import io, sys
@@ -35,40 +35,30 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 
 
-# ── Mapping colonne CSV bici -> chiavi JSON snake_case ────────────────────────
-# Colonne comuni a tutte le attività
+# ── Mapping colonne CSV nuoto -> chiavi JSON snake_case ────────────────────────
+# Colonne specifiche per il nuoto
 CSV_KEY_MAP = {
-    "Lap":                              "lap",
+    "Ripetute":                         "lap",
+    "Stile":                            "stile",
+    "Vasche":                           "vasche",
+    "Distanza":                         "distanza_m",
     "Tempo":                            "tempo",
     "Tempo cumulato":                   "tempo_cumulato",
-    "Distanza":                         "distanza_km",      # bici: senza "km" nell'intestazione
-    "Distanza km":                      "distanza_km",      # fallback corsa
-    "Velocità media":                   "velocita_media_kmh",
-    "Velocità max":                     "velocita_max_kmh",
-    "Velocità media in movimento":      "velocita_media_movimento_kmh",
+    "Passo medio":                      "passo_medio",
+    "Passo migliore":                   "passo_migliore",
+    "Swolf medio":                      "swolf_medio",
     "FC Media":                         "fc_media_bpm",
-    "FC Media bpm":                     "fc_media_bpm",     # fallback corsa
     "FC max":                           "fc_max_bpm",
-    "FC max bpm":                       "fc_max_bpm",       # fallback corsa
-    "Ascesa totale":                    "ascesa_m",
-    "Ascesa totale m":                  "ascesa_m",         # fallback corsa
-    "Discesa totale":                   "discesa_m",
-    "Discesa totale m":                 "discesa_m",        # fallback corsa
-    "Cadenza pedalata media":           "cadenza_pedalata_media_rpm",
-    "Cadenza pedalata max":             "cadenza_pedalata_max_rpm",
+    "Totale bracciate":                 "totale_bracciate",
+    "Bracciate medie":                  "bracciate_medie",
     "Calorie":                          "calorie",
-    "Calorie C":                        "calorie",          # fallback corsa
-    "Tempo in movimento":               "tempo_in_movimento",
-    "Potenza media W":                  "potenza_media_w",
-    "Potenza max W":                    "potenza_max_w",
-    "W/kg medio":                       "wkg_medio",
-    "W/kg massimo":                     "wkg_massimo",
-    "Temperatura med":                  "temperatura_med",
 }
 
 
 def normalize_key(k: str) -> str:
     """Converte l'intestazione CSV in chiave JSON snake_case."""
+    if not k:
+        return None
     mapped = CSV_KEY_MAP.get(k.strip())
     if mapped:
         return mapped
@@ -79,6 +69,8 @@ def normalize_key(k: str) -> str:
 
 def clean_value(v: str):
     """Converte il valore CSV nel tipo Python più appropriato."""
+    if v is None:
+        return None
     v = v.strip()
     if v in ("--", "", "N/D"):
         return None
@@ -102,8 +94,12 @@ def parse_csv(csv_path: Path) -> dict:
     with open(csv_path, encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            lap_label = row.get("Lap", "").strip()
-            record = {normalize_key(k): clean_value(v) for k, v in row.items()}
+            lap_label = row.get("Ripetute", "").strip()
+            record = {}
+            for k, v in row.items():
+                norm_k = normalize_key(k)
+                if norm_k:
+                    record[norm_k] = clean_value(v)
             if lap_label == "Riepilogo":
                 summary = record
             else:
@@ -142,10 +138,10 @@ def parse_gpx_meta(gpx_path: Path) -> dict:
 
 
 # ── Elaborazione attività ──────────────────────────────────────────────────────
-def process_bike_dir(bike_dir: Path, output_dir: Path) -> list:
-    """Processa tutte le coppie CSV+GPX nella cartella bike e restituisce la lista delle attività (legge da cache se già processate)."""
+def process_swim_dir(swim_dir: Path, output_dir: Path) -> list:
+    """Processa tutte le coppie CSV+GPX nella cartella swim e restituisce la lista delle attività (legge da cache se già processate)."""
     files_by_id = defaultdict(dict)
-    for f in bike_dir.iterdir():
+    for f in swim_dir.iterdir():
         if not f.is_file():
             continue
         m = re.match(r"activity_(\d+)\.(csv|gpx)", f.name, re.IGNORECASE)
@@ -162,7 +158,7 @@ def process_bike_dir(bike_dir: Path, output_dir: Path) -> list:
             print(f"  ! {aid}: GPX mancante, skip")
             continue
 
-        out_file = output_dir / f"bike_activity_{aid}.json"
+        out_file = output_dir / f"swim_activity_{aid}.json"
         if out_file.exists():
             print(f"  -> activity {aid} (già processata, leggo da cache)")
             with open(out_file, "r", encoding="utf-8") as f:
@@ -177,7 +173,7 @@ def process_bike_dir(bike_dir: Path, output_dir: Path) -> list:
 
         activities.append({
             "activity_id":    aid,
-            "sport":          "cycling",
+            "sport":          "swimming",
             "name":           meta["name"],
             "date":           meta["date"],
             "start_time_utc": meta["start_time_utc"],
@@ -192,21 +188,21 @@ def process_bike_dir(bike_dir: Path, output_dir: Path) -> list:
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 def main():
-    bike_dir   = Path(__file__).parent / BIKE_DIR
-    output_dir = Path(__file__).parent / "output" / "bike"
+    swim_dir   = Path(__file__).parent / SWIM_DIR
+    output_dir = Path(__file__).parent / "output" / "swim"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    if not bike_dir.is_dir():
-        print(f"[ERRORE] Cartella bici non trovata: {bike_dir}")
+    if not swim_dir.is_dir():
+        print(f"[ERRORE] Cartella nuoto non trovata: {swim_dir}")
         sys.exit(1)
 
-    print(f"\n[START] Processo le attività bici da: {bike_dir}")
+    print(f"\n[START] Processo le attività di nuoto da: {swim_dir}")
     print(f"        Output -> {output_dir}\n")
 
-    activities = process_bike_dir(bike_dir, output_dir)
+    activities = process_swim_dir(swim_dir, output_dir)
 
     if not activities:
-        print(f"[!] Nessuna attività trovata in {bike_dir}.")
+        print(f"[!] Nessuna attività trovata in {swim_dir}.")
         sys.exit(1)
 
     # ── Un JSON per ogni attività ────────────────────────────────────────────
@@ -214,7 +210,7 @@ def main():
         if act.pop("_cached", False):
             continue
         aid      = act["activity_id"]
-        out_file = output_dir / f"bike_activity_{aid}.json"
+        out_file = output_dir / f"swim_activity_{aid}.json"
         with open(out_file, "w", encoding="utf-8") as out:
             json.dump(act, out, ensure_ascii=False, indent=2)
         print(f"     ✓  {out_file.name}")
@@ -225,15 +221,15 @@ def main():
         key=lambda a: (a["date"] or "", a["start_time_utc"] or "")
     )
 
-    all_bike = {
-        "sport":            "cycling",
+    all_swim = {
+        "sport":            "swimming",
         "activity_count":   len(activities_sorted),
         "activities":       activities_sorted,
     }
 
-    all_file = output_dir / "all_bike.json"
+    all_file = output_dir / "all_swim.json"
     with open(all_file, "w", encoding="utf-8") as out:
-        json.dump(all_bike, out, ensure_ascii=False, indent=2)
+        json.dump(all_swim, out, ensure_ascii=False, indent=2)
 
     print(f"\n[OK] {len(activities)} attività -> {output_dir}")
     print(f"     Aggregato: {all_file.name}")

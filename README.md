@@ -1,14 +1,14 @@
-# 🏃‍♂️ Running & Training Data Dashboard
+# 🏃‍♂️ Triathlon & Running Data Dashboard
 
-Benvenuto nel progetto **Running Data**! Questa repository è nata per aiutarti a raccogliere, elaborare e visualizzare i dati dei tuoi allenamenti (corsa e bici) esportati da Garmin Connect, trasformandoli in una dashboard interattiva e moderna.
+Benvenuto nel progetto **Running Data**! Questa repository è nata per aiutarti a raccogliere, elaborare e visualizzare i dati dei tuoi allenamenti (Corsa, Bici, Nuoto) esportati da Garmin Connect, trasformandoli in una dashboard interattiva e moderna, ideale per la preparazione a eventi come un Ironman 70.3.
 
 ## ✨ Funzionalità
 
-- **Conversione Automatica**: Script Python per trasformare i file Garmin (CSV per i lap e GPX per i metadati) in file JSON strutturati.
-- **Organizzazione Settimanale**: I dati sono raggruppati per settimana di allenamento (es. W01, W02...), ideale per monitorare piani di preparazione maratona.
-- **Dashboard Interattiva**: Visualizzazione dei trend di volume (km totali) e intensità (FC media) tramite grafici dinamici.
-- **Supporto Multi-Sport**: Gestione separata per corsa e ciclismo.
-- **Dettaglio Attività**: Analisi specifica per ogni sessione, inclusi lap, FC max, cadenza e altro ancora.
+- **Conversione Automatica Unificata**: Un unico script Python per trasformare i file Garmin (CSV per i lap e GPX per i metadati) in file JSON strutturati.
+- **Riconoscimento Sport Automatico**: Lo script legge il tag `<type>` dai file GPX per smistare automaticamente gli allenamenti tra corsa, bici e nuoto.
+- **Organizzazione Annuale e Settimanale**: Tutti gli allenamenti (a prescindere dallo sport) vengono inseriti nella cartella dell'anno e della settimana corrispondente (es. `2026/W01/`), riflettendo fedelmente la struttura di un piano di allenamento triathlon.
+- **Cache Intelligente**: Lo script salta l'elaborazione dei file già convertiti per velocizzare le esecuzioni successive.
+- **Output Nominale Individuale**: Per evitare file giganti e ingestibili, lo script genera file JSON snelli e separati per ogni allenamento con la nomenclatura `<Settimana>_<Sport>_<ID>.json` (es. `W04_corsa_12345.json`).
 
 ---
 
@@ -24,17 +24,18 @@ Benvenuto nel progetto **Running Data**! Questa repository è nata per aiutarti 
 
 ```text
 running-data/
-├── 2026-10-29-M/         # Cartella principale dati (es. nome maratona)
-│   ├── W01/              # Settimana 1
+├── 2026/                 # Cartella principale anno corrente
+│   ├── W01/              # Settimana 1 (corsa, bici, nuoto insieme)
 │   │   ├── activity_123.csv
 │   │   └── activity_123.gpx
 │   └── ...
-├── bike/                 # Dati attività ciclismo
-├── output/               # JSON generati dagli script
-├── convert_all.py        # Elabora tutte le settimane di corsa
-├── convert_week.py       # Elabora una singola settimana specifica
-├── convert_bike.py       # Elabora le attività in bici
-├── dashboard.html        # Il frontend della dashboard
+├── output2026/           # JSON generati dallo script
+│   ├── W01/              # File json individuali
+│   │   ├── W01_corsa_123.json
+│   │   ├── W01_bici_456.json
+│   │   └── W01_nuoto_789.json
+│   └── ...
+├── convert_all.py        # Elabora tutte le attività e smista per sport
 └── ...
 ```
 
@@ -50,43 +51,20 @@ Per ogni attività che vuoi includere:
 4. Seleziona **Esporta Lap in CSV**.
 5. Rinomina i file come `activity_<ID>.csv` e `activity_<ID>.gpx` (es. `activity_987654.csv`).
 
-### 2. Organizzazione File
-Crea una cartella per la tua preparazione (es. `2026-10-29-M`) e all'interno sottocartelle per le settimane (`W01`, `W02`...). Inserisci i file CSV e GPX nella settimana corrispondente.
+### 2. Organizzazione File (Anno e Settimana)
+Aggiungi semplicemente i file appena scaricati nella cartella della settimana di riferimento dentro l'anno corretto (es. `2026/W04/`). Non devi preoccuparti di dividerli per sport, lo script lo farà per te nominandoli automaticamente nel file di output.
 
 ### 3. Elaborazione Dati
 Dalla cartella root del progetto, esegui:
 
 ```bash
-# Per elaborare tutto e generare il file per la dashboard
 python convert_all.py
-
-# Per elaborare solo le attività in bici
-python convert_bike.py
 ```
 
-I file JSON verranno creati nella cartella `output/`. In particolare, `all_activities.json` è il file principale usato dalla dashboard.
-
-### 4. Visualizzazione Dashboard
-A causa delle restrizioni di sicurezza dei browser sui file locali (CORS), la dashboard deve essere servita tramite un server locale:
-
-```bash
-# Avvia un server locale
-python -m http.server 8000
-```
-
-Ora apri il browser su [http://localhost:8000/dashboard.html](http://localhost:8000/dashboard.html).
-
----
-
-## 📊 La Dashboard
-
-La dashboard è costruita con **HTML5**, **Vanilla CSS** e **Chart.js**. Offre due viste principali:
-1. **Trend Generale**: Un grafico a barre e linee che mostra i km totali settimanali e la frequenza cardiaca media.
-2. **Dettaglio Settimanale**: Selezionando una settimana dal menu a tendina, puoi vedere la distanza e l'intensità di ogni singolo allenamento di quel periodo.
-
----
+I file JSON verranno creati nella cartella `output2026/`. Lo script scarterà automaticamente quelli già processati in passato basandosi sul nome del file. Ogni allenamento avrà il suo JSON dedicato, compatto e facilmente importabile nel tuo pannello allenamenti.
 
 ## 💡 Note Tecniche
 
-- **Mapping**: Gli script Python normalizzano le intestazioni dei CSV Garmin (spesso in italiano) in chiavi JSON standard (snake_case).
+- **Nomenclatura Output**: I file vengono salvati automaticamente nel formato `[Settimana]_[sport]_[ID].json`. I nomi degli sport sono stati italianizzati per leggibilità (`corsa`, `bici`, `nuoto`).
+- **Mapping**: Lo script Python normalizza le intestazioni dei CSV Garmin (spesso in italiano) in chiavi JSON standard (snake_case), adattandosi alle differenze tra corsa, bici e nuoto.
 - **Integrità**: Se un'attività ha solo il GPX o solo il CSV, lo script la salterà segnalando l'errore.

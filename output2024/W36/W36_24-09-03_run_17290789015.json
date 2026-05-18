@@ -1,0 +1,36 @@
+{
+  "week": "W36",
+  "activity_id": "17290789015",
+  "sport": "running",
+  "name": "San Miniato - Corsa Veloce",
+  "date": "2024-09-03",
+  "start_time_utc": "2024-09-03T17:29:02.000Z",
+  "start_time": "17:29:02",
+  "type": "walking",
+  "laps": [
+    {
+      "lap": 1,
+      "tempo": "30:06",
+      "tempo_cumulato": "30:06",
+      "distanza": 3.26,
+      "passo_medio": "9:13",
+      "ascesa_totale": 54,
+      "discesa_totale": 55,
+      "passo_migliore": "3:20",
+      "tempo_in_movimento": "29:33",
+      "passo_medio_in_movimento": "9:03"
+    }
+  ],
+  "summary": {
+    "lap": "Riepilogo",
+    "tempo": "30:06",
+    "tempo_cumulato": "30:06",
+    "distanza": 3.26,
+    "passo_medio": "9:13",
+    "ascesa_totale": 54,
+    "discesa_totale": 55,
+    "passo_migliore": "3:20",
+    "tempo_in_movimento": "29:33",
+    "passo_medio_in_movimento": "9:03"
+  }
+}

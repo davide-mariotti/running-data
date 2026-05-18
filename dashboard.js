@@ -1,345 +1,467 @@
-// Constants
-const DATA_URL = 'output/all_activities.json';
+// dashboard.js — Ironman Multi-Year Dashboard
+const DATA_URL = 'dashboard_index.json';
 
 // State
-let allData = [];
-let weeklyDataMap = new Map(); // Maps week -> array of activities
-let aggregateChartInst = null;
-let weeklyDistChartInst = null;
-let weeklyHrChartInst = null;
+let rawData = [], filteredData = [];
+let activeYears = new Set(), availableYears = [];
+let activeSport = 'all', volumeUnit = 'km';
+let chartYoY = null, chartEfficiency = null, chartWeekly = null;
 
+Chart.defaults.color = '#8b9bc8';
+Chart.defaults.font.family = 'Inter';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+// ── Helpers ───────────────────────────────────────────────
+const weekNum = w => parseInt((w || '').replace('W', ''), 10) || 0;
+
+function parseTimeToMin(t) {
+    if (!t || typeof t !== 'string') return 0;
+    const p = t.split(':').map(Number);
+    return p.length === 3 ? p[0]*60 + p[1] + p[2]/60 : p.length === 2 ? p[0] + p[1]/60 : 0;
+}
+
+function parsePaceToSec(s) {
+    if (!s || typeof s !== 'string') return null;
+    const p = s.split(':').map(Number);
+    return p.length === 2 && !isNaN(p[0]) && !isNaN(p[1]) ? p[0]*60 + p[1] : null;
+}
+
+function formatPace(sec) {
+    if (!sec) return '—';
+    return `${Math.floor(sec/60)}:${String(Math.round(sec%60)).padStart(2,'0')} /km`;
+}
+
+function getDistance(s, sport) {
+    if (!s) return 0;
+    if (sport === 'swimming') return (s.distanza_m || 0) / 1000;
+    return s.distanza_km || s.distanza || 0;
+}
+
+function getDurationMin(s) { return parseTimeToMin((s || {}).tempo || (s || {}).tempo_cumulato || ''); }
+function getHR(s)     { return (s || {}).fc_media_bpm || 0; }
+function getPower(s)  { return (s || {}).potenza_media_w || (s || {}).potenza_media || 0; }
+function getSpeed(s)  { return (s || {}).velocita_media_kmh || (s || {}).velocita_media_movimento_kmh || 0; }
+function getSwolf(s)  { return (s || {}).swolf_medio || 0; }
+function getPace(s) {
+    if (!s) return null;
+    return parsePaceToSec(s.passo_medio || s.passo_medio_min_km || null);
+}
+
+function heatLevel(min) {
+    if (min === 0) return 0; if (min < 40) return 1;
+    if (min < 80) return 2;  if (min < 120) return 3; return 4;
+}
+
+function hrToColor(hr) {
+    if (!hr || hr < 100) return 'rgba(148,163,184,0.7)';
+    if (hr < 130) return 'rgba(16,185,129,0.8)';
+    if (hr < 145) return 'rgba(59,130,246,0.8)';
+    if (hr < 158) return 'rgba(234,179,8,0.8)';
+    if (hr < 170) return 'rgba(249,115,22,0.8)';
+    return 'rgba(239,68,68,0.85)';
+}
+
+const YEAR_COLORS = [
+    { line:'#3b82f6', fill:'rgba(59,130,246,0.15)'  },
+    { line:'#f97316', fill:'rgba(249,115,22,0.15)'  },
+    { line:'#10b981', fill:'rgba(16,185,129,0.15)'  },
+    { line:'#8b5cf6', fill:'rgba(139,92,246,0.15)'  },
+];
+const SPORT_COLORS = {
+    running:  { bg:'rgba(249,115,22,0.75)',  border:'#f97316' },
+    cycling:  { bg:'rgba(59,130,246,0.75)',  border:'#3b82f6' },
+    swimming: { bg:'rgba(6,182,212,0.75)',   border:'#06b6d4' },
+};
+const SPORT_LABELS = { running:'🏃 Corsa', cycling:'🚴 Bici', swimming:'🏊 Nuoto' };
+
+// ── Load ──────────────────────────────────────────────────
 async function loadData() {
     try {
-        const response = await fetch(DATA_URL);
-        if (!response.ok) throw new Error('Network response was not ok');
-        allData = await response.json();
-        
-        processData();
-        initDashboard();
-    } catch (error) {
-        console.error('Error loading data:', error);
-        alert('Impossibile caricare i dati. Assicurati di eseguire un server locale nella cartella del progetto (es. python -m http.server)');
+        const res = await fetch(DATA_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        rawData = await res.json();
+        availableYears = [...new Set(rawData.map(a => a.year))].sort();
+        activeYears = new Set(availableYears);
+        initFilters();
+        applyFilters();
+        hideLoading();
+    } catch (err) {
+        console.error(err);
+        document.querySelector('.loading-overlay p').textContent =
+            '❌ Errore: avvia un server locale (es. python -m http.server)';
     }
 }
 
-function processData() {
-    // Group all flat activities into weeks
-    allData.forEach(act => {
-        if (!act.week) return; // Skip if no week
-        if (!weeklyDataMap.has(act.week)) {
-            weeklyDataMap.set(act.week, { week: act.week, activities: [] });
-        }
-        weeklyDataMap.get(act.week).activities.push(act);
-    });
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.add('hidden');
 }
 
-function extractActivitySummary(act) {
-    if (act.summary) {
-        return {
-            distanza: act.summary.distanza_km || act.summary.distanza || 0,
-            fc_media: act.summary.fc_media_bpm || act.summary.fc_media || 0,
-            fc_max: act.summary.fc_max_bpm || act.summary.fc_max || 0
-        };
-    }
-    
-    if (act.laps && act.laps.length > 0) {
-        const riepilogo = act.laps.find(l => l.lap === 'Riepilogo' || l.intervallo === 'Riepilogo');
-        if (riepilogo) {
-            return {
-                distanza: riepilogo.distanza_km || riepilogo.distanza || 0,
-                fc_media: riepilogo.fc_media_bpm || riepilogo.fc_media || 0,
-                fc_max: riepilogo.fc_max_bpm || riepilogo.fc_max || 0
-            };
-        }
-    }
-    
-    return null;
-}
-
-function initDashboard() {
-    // Process aggregate data
-    const labels = [];
-    const distances = [];
-    const hrAvgs = [];
-
-    // Array from map to iterate in order
-    const weeksList = Array.from(weeklyDataMap.values());
-
-    weeksList.forEach(weekData => {
-        labels.push(weekData.week);
-        
-        let totalDist = 0;
-        let totalHr = 0;
-        let hrCount = 0;
-
-        weekData.activities.forEach(act => {
-            const summary = extractActivitySummary(act);
-            if (summary) {
-                if (summary.distanza) totalDist += summary.distanza;
-                if (summary.fc_media) {
-                    totalHr += summary.fc_media;
-                    hrCount++;
-                }
-            }
+// ── Filters ───────────────────────────────────────────────
+function initFilters() {
+    // Sport buttons
+    document.querySelectorAll('.nav-btn[data-sport]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.nav-btn[data-sport]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeSport = btn.dataset.sport;
+            applyFilters();
         });
-
-        distances.push(totalDist);
-        hrAvgs.push(hrCount > 0 ? Math.round(totalHr / hrCount) : 0);
     });
 
-    renderAggregateChart(labels, distances, hrAvgs);
-
-    // Populate week selector
-    const selector = document.getElementById('weekSelector');
-    weeksList.forEach((weekData, index) => {
-        const option = document.createElement('option');
-        option.value = index; // Store index in the Array
-        option.textContent = weekData.week;
-        selector.appendChild(option);
+    // Volume unit toggle
+    document.querySelectorAll('#volumeUnitToggle .toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#volumeUnitToggle .toggle-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            volumeUnit = btn.dataset.unit;
+            renderYoYChart();
+        });
     });
 
-    selector.addEventListener('change', (e) => {
-        const idx = parseInt(e.target.value);
-        renderWeeklyCharts(weeksList[idx]);
+    // Year buttons (dynamic)
+    const container = document.getElementById('yearFilters');
+    availableYears.forEach(year => {
+        const btn = document.createElement('button');
+        btn.className = 'year-btn active';
+        btn.dataset.year = year;
+        const count = rawData.filter(a => a.year === year).length;
+        btn.innerHTML = `${year} <span class="year-count">${count}</span>`;
+        btn.addEventListener('click', () => {
+            if (activeYears.has(year)) {
+                if (activeYears.size === 1) return;
+                activeYears.delete(year); btn.classList.remove('active');
+            } else {
+                activeYears.add(year); btn.classList.add('active');
+            }
+            applyFilters();
+        });
+        container.appendChild(btn);
     });
 
-    // Initial render for weekly chart
-    if (weeksList.length > 0) {
-        renderWeeklyCharts(weeksList[0]);
+    // Last update date
+    const dates = rawData.map(a => a.date).filter(Boolean).sort();
+    if (dates.length) {
+        const d = new Date(dates[dates.length - 1]);
+        document.getElementById('lastUpdate').textContent =
+            d.toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' });
     }
 }
 
-function renderAggregateChart(labels, distances, hrAvgs) {
-    const ctx = document.getElementById('aggregateChart').getContext('2d');
-    
-    // Set default Chart.js colors
-    Chart.defaults.color = '#94a3b8';
-    Chart.defaults.font.family = 'Inter';
+function applyFilters() {
+    filteredData = rawData.filter(a =>
+        (activeSport === 'all' || a.sport === activeSport) && activeYears.has(a.year)
+    );
+    updateKPIs();
+    updateHeader();
+    renderYoYChart();
+    renderEfficiencyChart();
+    renderHeatmap();
+    renderWeeklyChart();
+}
 
-    aggregateChartInst = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    type: 'line',
-                    label: 'FC Media (bpm)',
-                    data: hrAvgs,
-                    borderColor: '#ec4899',
-                    backgroundColor: '#ec4899',
-                    borderWidth: 3,
-                    tension: 0.4,
-                    yAxisID: 'y1',
-                    pointBackgroundColor: '#0f172a',
-                    pointBorderColor: '#ec4899',
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                },
-                {
-                    type: 'bar',
-                    label: 'Distanza Totale (km)',
-                    data: distances,
-                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                    borderColor: '#3b82f6',
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    yAxisID: 'y'
-                }
-            ]
-        },
+// ── KPIs ──────────────────────────────────────────────────
+function updateKPIs() {
+    let km = 0, min = 0, hrSum = 0, hrN = 0;
+    filteredData.forEach(a => {
+        const s = a.summary || {};
+        km  += getDistance(s, a.sport);
+        min += getDurationMin(s);
+        const hr = getHR(s);
+        if (hr > 0) { hrSum += hr; hrN++; }
+    });
+    document.getElementById('kpiActivities').textContent = filteredData.length;
+    document.getElementById('kpiKm').textContent = km.toFixed(0) + ' km';
+    const h = Math.floor(min/60), m = Math.round(min%60);
+    document.getElementById('kpiHours').textContent = `${h}h ${m}m`;
+    document.getElementById('kpiHr').textContent = hrN ? Math.round(hrSum/hrN) + ' bpm' : '—';
+}
+
+function updateHeader() {
+    const labels = { all:'Tutti gli sport', running:'Corsa', cycling:'Bici', swimming:'Nuoto' };
+    document.getElementById('header-subtitle').textContent =
+        `${labels[activeSport]} — ${[...activeYears].sort().join(' • ')}`;
+}
+
+// ── Chart 1: YoY Cumulative ───────────────────────────────
+function renderYoYChart() {
+    const ctx = document.getElementById('chartYoY').getContext('2d');
+    if (chartYoY) { chartYoY.destroy(); chartYoY = null; }
+
+    const datasets = [...activeYears].sort().map((year, idx) => {
+        const acts = filteredData.filter(a => a.year === year);
+        const weekly = {};
+        acts.forEach(a => {
+            const w = weekNum(a.week);
+            if (!w) return;
+            const v = volumeUnit === 'km' ? getDistance(a.summary||{}, a.sport) : getDurationMin(a.summary||{})/60;
+            weekly[w] = (weekly[w]||0) + v;
+        });
+        const maxW = Math.max(...Object.keys(weekly).map(Number), 1);
+        let cum = 0;
+        const data = [];
+        for (let w = 1; w <= maxW; w++) { cum += (weekly[w]||0); data.push({ x:w, y:parseFloat(cum.toFixed(1)) }); }
+        const c = YEAR_COLORS[idx % YEAR_COLORS.length];
+        return { label:year, data, borderColor:c.line, backgroundColor:c.fill, borderWidth:2.5,
+                 pointRadius:3, pointHoverRadius:6, tension:0.35, fill:true, parsing:false };
+    });
+
+    const unit = volumeUnit === 'km' ? 'km' : 'ore';
+    const tooltipOpts = makeTooltipOpts({
+        title: items => `Settimana ${items[0].parsed.x}`,
+        label: item => ` ${item.dataset.label}: ${item.parsed.y.toFixed(1)} ${unit}`,
+    });
+
+    chartYoY = new Chart(ctx, {
+        type: 'line', data: { datasets },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        color: '#f8fafc',
-                        usePointStyle: true,
-                        padding: 20
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                    titleColor: '#f8fafc',
-                    bodyColor: '#e2e8f0',
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    borderWidth: 1,
-                    padding: 12,
-                    cornerRadius: 8
-                }
-            },
+            responsive:true, maintainAspectRatio:false,
+            interaction:{ mode:'index', intersect:false },
+            plugins:{ legend: makeLegendOpts(), tooltip: tooltipOpts },
             scales: {
-                x: {
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.05)'
-                    }
-                },
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Distanza (km)',
-                        color: '#3b82f6'
-                    },
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.05)'
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'FC Media (bpm)',
-                        color: '#ec4899'
-                    },
-                    grid: {
-                        drawOnChartArea: false
-                    }
-                }
+                x:{ type:'linear', title:{ display:true, text:'Settimana', color:'#4a5878', font:{size:11} }, grid:{ color:'rgba(255,255,255,0.04)' }, ticks:{ stepSize:2 } },
+                y:{ title:{ display:true, text:`Volume cumulativo (${unit})`, color:'#4a5878', font:{size:11} }, grid:{ color:'rgba(255,255,255,0.04)' } },
             }
         }
     });
 }
 
-function renderWeeklyCharts(weekData) {
-    const labels = [];
-    const distances = [];
-    const hrAvg = [];
-    const hrMax = [];
+// ── Chart 2: Aerobic Efficiency (Scatter) ─────────────────
+function renderEfficiencyChart() {
+    const ctx = document.getElementById('chartEfficiency').getContext('2d');
+    if (chartEfficiency) { chartEfficiency.destroy(); chartEfficiency = null; }
 
-    weekData.activities.forEach(act => {
-        // Use a short name for labels
-        let shortName = act.name.replace(weekData.week + ' - ', '');
-        if (shortName.length > 20) shortName = shortName.substring(0, 20) + '...';
-        labels.push(shortName);
+    const sport = activeSport === 'all' ? 'running' : activeSport;
+    let datasets = [], yLabel = '', subtitle = '', reverseY = false;
+    let tooltipCb = {};
 
-        const summary = extractActivitySummary(act);
-        if (summary) {
-            distances.push(summary.distanza || 0);
-            hrAvg.push(summary.fc_media || 0);
-            hrMax.push(summary.fc_max || 0);
+    if (sport === 'running') {
+        subtitle = 'Passo medio (sec/km) vs Settimana — colore per FC Media (🟢Z1 🔵Z2 🟡Z3 🟠Z4 🔴Z5)';
+        yLabel = 'Passo (sec/km) — più basso = più veloce'; reverseY = true;
+        tooltipCb = {
+            title: items => items[0].raw.name || `Sett. ${items[0].parsed.x}`,
+            label: item => [` 📅 ${item.raw.date}`, ` ⚡ ${formatPace(item.parsed.y)}`, ` ❤️ FC: ${item.raw.hr} bpm`],
+        };
+        const byYear = groupByYear(filteredData.filter(a => a.sport==='running'), a => {
+            const pace=getPace(a.summary), w=weekNum(a.week), hr=getHR(a.summary);
+            return (pace && w) ? { x:w, y:pace, hr, name:a.name, date:a.date } : null;
+        });
+        Object.entries(byYear).sort().forEach(([yr, pts], i) => {
+            const c = YEAR_COLORS[i % YEAR_COLORS.length];
+            datasets.push({ label:`${yr} — Corsa`, data:pts, backgroundColor:pts.map(p=>hrToColor(p.hr)),
+                borderColor:c.line, borderWidth:1, pointRadius:6, pointHoverRadius:9, parsing:false });
+        });
+    } else if (sport === 'cycling') {
+        subtitle = 'Velocità media (km/h) vs Settimana — colore per FC Media (🟢Z1 🔵Z2 🟡Z3 🟠Z4 🔴Z5)';
+        yLabel = 'Velocità media (km/h) — più alto = più efficiente'; reverseY = false;
+        tooltipCb = {
+            title: items => items[0].raw.name || `Sett. ${items[0].parsed.x}`,
+            label: item => [` 📅 ${item.raw.date}`, ` 🚴 ${item.parsed.y.toFixed(1)} km/h`, ` ❤️ FC: ${item.raw.hr} bpm`],
+        };
+        const byYear = groupByYear(filteredData.filter(a => a.sport==='cycling'), a => {
+            const spd=getSpeed(a.summary), hr=getHR(a.summary), w=weekNum(a.week);
+            return (spd && w) ? { x:w, y:parseFloat(spd.toFixed(1)), hr, name:a.name, date:a.date } : null;
+        });
+        Object.entries(byYear).sort().forEach(([yr, pts], i) => {
+            const c = YEAR_COLORS[i % YEAR_COLORS.length];
+            datasets.push({ label:`${yr} — Bici`, data:pts, backgroundColor:pts.map(p=>hrToColor(p.hr)),
+                borderColor:c.line, borderWidth:1, pointRadius:6, pointHoverRadius:9, parsing:false });
+        });
+    } else {
+        subtitle = 'SWOLF medio vs Settimana — più basso = più efficiente';
+        yLabel = 'SWOLF medio'; reverseY = true;
+        tooltipCb = {
+            title: items => items[0].raw.name || `Sett. ${items[0].parsed.x}`,
+            label: item => [` 📅 ${item.raw.date}`, ` 🌊 SWOLF: ${item.parsed.y}`],
+        };
+        const byYear = groupByYear(filteredData.filter(a => a.sport==='swimming'), a => {
+            const swolf=getSwolf(a.summary), w=weekNum(a.week);
+            return (swolf && w) ? { x:w, y:swolf, name:a.name, date:a.date } : null;
+        });
+        Object.entries(byYear).sort().forEach(([yr, pts], i) => {
+            const c = YEAR_COLORS[i % YEAR_COLORS.length];
+            datasets.push({ label:`${yr} — Nuoto`, data:pts, backgroundColor:'rgba(6,182,212,0.5)',
+                borderColor:'#06b6d4', borderWidth:1.5, pointRadius:6, pointHoverRadius:9, parsing:false });
+        });
+    }
+
+    document.getElementById('efficiencySubtitle').textContent = subtitle;
+    const yTickCb = sport === 'running' ? val => formatPace(val) : val => val;
+
+    chartEfficiency = new Chart(ctx, {
+        type: 'scatter', data: { datasets },
+        options: {
+            responsive:true, maintainAspectRatio:false,
+            interaction:{ mode:'nearest', intersect:true },
+            plugins:{ legend:makeLegendOpts(), tooltip:makeTooltipOpts(tooltipCb) },
+            scales: {
+                x:{ type:'linear', title:{ display:true, text:'Settimana', color:'#4a5878', font:{size:11} }, grid:{ color:'rgba(255,255,255,0.04)' } },
+                y:{ reverse:reverseY, title:{ display:true, text:yLabel, color:'#4a5878', font:{size:11} }, grid:{ color:'rgba(255,255,255,0.04)' }, ticks:{ callback:yTickCb } },
+            }
+        }
+    });
+}
+
+// ── Chart 3: GitHub-style Heatmap ────────────────────────
+function renderHeatmap() {
+    const wrapper = document.getElementById('heatmapWrapper');
+    wrapper.innerHTML = '';
+
+    const dayMap = {};
+    rawData.filter(a => activeYears.has(a.year) && a.date).forEach(a => {
+        const min = getDurationMin(a.summary || {});
+        dayMap[a.date] = (dayMap[a.date] || 0) + min;
+    });
+
+    const allDates = rawData.filter(a => activeYears.has(a.year) && a.date).map(a => a.date).sort();
+    if (!allDates.length) return;
+
+    const firstDate = new Date(allDates[0]);
+    const lastDate  = new Date(allDates[allDates.length - 1]);
+
+    // Align to Monday
+    const startDate = new Date(firstDate);
+    const d0 = startDate.getDay();
+    startDate.setDate(startDate.getDate() + (d0 === 0 ? -6 : 1 - d0));
+
+    const MONTHS = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+    const DAYS   = ['L','M','M','G','V','S','D'];
+
+    const container = document.createElement('div');
+    container.className = 'heatmap-container';
+
+    // Day-of-week label column
+    const lblCol = document.createElement('div');
+    lblCol.className = 'heatmap-week-col';
+    lblCol.style.marginTop = '22px';
+    DAYS.forEach(d => {
+        const el = document.createElement('div');
+        el.style.cssText = 'height:14px;font-size:0.6rem;color:var(--text-3);display:flex;align-items:center;padding-right:4px;';
+        el.textContent = d;
+        lblCol.appendChild(el);
+    });
+    container.appendChild(lblCol);
+
+    let cursor = new Date(startDate);
+    let curMonth = -1, monthGroup = null, monthDays = null, weekCol = null;
+
+    while (cursor <= lastDate) {
+        const mo = cursor.getMonth();
+        if (mo !== curMonth) {
+            curMonth = mo;
+            monthGroup = document.createElement('div');
+            monthGroup.className = 'heatmap-month-group';
+            const lbl = document.createElement('div');
+            lbl.className = 'heatmap-month-label';
+            lbl.textContent = `${MONTHS[mo]} ${cursor.getFullYear()}`;
+            monthDays = document.createElement('div');
+            monthDays.className = 'heatmap-month-days';
+            monthGroup.appendChild(lbl);
+            monthGroup.appendChild(monthDays);
+            container.appendChild(monthGroup);
+            weekCol = null;
+        }
+
+        const dow = cursor.getDay() === 0 ? 6 : cursor.getDay() - 1; // Mon=0
+        if (dow === 0 || weekCol === null) {
+            weekCol = document.createElement('div');
+            weekCol.className = 'heatmap-week-col';
+            if (monthDays.children.length === 0 && dow > 0) {
+                for (let i = 0; i < dow; i++) {
+                    const blank = document.createElement('div');
+                    blank.style.height = '14px';
+                    weekCol.appendChild(blank);
+                }
+            }
+            monthDays.appendChild(weekCol);
+        }
+
+        const dateStr = cursor.toISOString().split('T')[0];
+        const minutes = dayMap[dateStr] || 0;
+        const cell = document.createElement('div');
+        cell.className = 'heat-cell';
+        cell.style.background = `var(--heat-${heatLevel(minutes)})`;
+        if (minutes > 0) {
+            const hh = Math.floor(minutes/60), mm = Math.round(minutes%60);
+            cell.title = `${dateStr}: ${hh}h ${mm}m`;
         } else {
-            distances.push(0);
-            hrAvg.push(0);
-            hrMax.push(0);
+            cell.title = dateStr;
         }
-    });
-
-    renderWeeklyDistChart(labels, distances);
-    renderWeeklyHrChart(labels, hrAvg, hrMax);
-}
-
-function renderWeeklyDistChart(labels, distances) {
-    const ctx = document.getElementById('weeklyDistanceChart').getContext('2d');
-    
-    if (weeklyDistChartInst) {
-        weeklyDistChartInst.destroy();
+        weekCol.appendChild(cell);
+        cursor.setDate(cursor.getDate() + 1);
     }
 
-    weeklyDistChartInst = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Distanza (km)',
-                data: distances,
-                backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                borderColor: '#10b981',
-                borderWidth: 1,
-                borderRadius: 4
-            }]
-        },
+    wrapper.appendChild(container);
+}
+
+// ── Chart 4: Weekly Stacked Bar ───────────────────────────
+function renderWeeklyChart() {
+    const ctx = document.getElementById('chartWeekly').getContext('2d');
+    if (chartWeekly) { chartWeekly.destroy(); chartWeekly = null; }
+
+    const weekSet = new Set();
+    filteredData.forEach(a => { if (a.week && a.year) weekSet.add(`${a.year}|${a.week}`); });
+    const allWeeks = [...weekSet].sort();
+    const labels = allWeeks.map(w => w.split('|')[1]);
+
+    const sportList = activeSport === 'all' ? ['running','cycling','swimming'] : [activeSport];
+    const datasets = sportList.map(sport => {
+        const { bg, border } = SPORT_COLORS[sport];
+        const data = allWeeks.map(wk => {
+            const [yr, wn] = wk.split('|');
+            const acts = filteredData.filter(a => a.year===yr && a.week===wn && a.sport===sport);
+            return parseFloat(acts.reduce((s, a) => s + getDistance(a.summary||{}, sport), 0).toFixed(1));
+        });
+        return { label:SPORT_LABELS[sport], data, backgroundColor:bg, borderColor:border,
+                 borderWidth:1, borderRadius:3, stack:'sports' };
+    });
+
+    chartWeekly = new Chart(ctx, {
+        type: 'bar', data: { labels, datasets },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive:true, maintainAspectRatio:false,
+            interaction:{ mode:'index', intersect:false },
             plugins: {
-                legend: { display: false }
+                legend: makeLegendOpts(),
+                tooltip: makeTooltipOpts({
+                    label: item => ` ${item.dataset.label}: ${item.parsed.y.toFixed(1)} km`,
+                    footer: items => {
+                        const tot = items.reduce((s, i) => s + i.parsed.y, 0);
+                        return tot > 0 ? `  Totale: ${tot.toFixed(1)} km` : null;
+                    },
+                }),
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255, 255, 255, 0.05)' }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: {
-                        maxRotation: 45,
-                        minRotation: 45
-                    }
-                }
+                x:{ grid:{ color:'rgba(255,255,255,0.04)' }, ticks:{ maxRotation:45, font:{size:10} } },
+                y:{ stacked:true, title:{ display:true, text:'Km', color:'#4a5878', font:{size:11} }, grid:{ color:'rgba(255,255,255,0.04)' } },
             }
         }
     });
 }
 
-function renderWeeklyHrChart(labels, hrAvg, hrMax) {
-    const ctx = document.getElementById('weeklyHrChart').getContext('2d');
-    
-    if (weeklyHrChartInst) {
-        weeklyHrChartInst.destroy();
-    }
-
-    weeklyHrChartInst = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    type: 'line',
-                    label: 'FC Max',
-                    data: hrMax,
-                    borderColor: '#f43f5e',
-                    backgroundColor: '#f43f5e',
-                    borderWidth: 2,
-                    borderDash: [5, 5],
-                    pointRadius: 4
-                },
-                {
-                    type: 'bar',
-                    label: 'FC Media',
-                    data: hrAvg,
-                    backgroundColor: 'rgba(236, 72, 153, 0.7)',
-                    borderColor: '#ec4899',
-                    borderWidth: 1,
-                    borderRadius: 4
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: { color: '#f8fafc', usePointStyle: true }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: false,
-                    min: 100, // typically HR doesn't drop below 100 during run
-                    grid: { color: 'rgba(255, 255, 255, 0.05)' }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: {
-                        maxRotation: 45,
-                        minRotation: 45
-                    }
-                }
-            }
-        }
-    });
+// ── Shared Chart.js config builders ──────────────────────
+function makeLegendOpts() {
+    return { position:'top', labels:{ color:'#f0f4ff', usePointStyle:true, padding:20, font:{ weight:'600', size:12 } } };
 }
 
-// Start
+function makeTooltipOpts(callbacks = {}) {
+    return {
+        backgroundColor:'rgba(8,14,26,0.95)', titleColor:'#f0f4ff', bodyColor:'#8b9bc8',
+        borderColor:'rgba(255,255,255,0.1)', borderWidth:1, padding:12, cornerRadius:10,
+        callbacks,
+    };
+}
+
+// ── Utility ───────────────────────────────────────────────
+function groupByYear(acts, mapFn) {
+    const out = {};
+    acts.forEach(a => {
+        const pt = mapFn(a);
+        if (!pt) return;
+        if (!out[a.year]) out[a.year] = [];
+        out[a.year].push(pt);
+    });
+    return out;
+}
+
+// ── Boot ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', loadData);

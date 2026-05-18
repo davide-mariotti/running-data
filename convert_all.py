@@ -11,8 +11,9 @@ UTILIZZO:
   - <ANNO>/Wxx/ (es. 2026/W01/, 2027/W01/)
   
   Determina automaticamente lo sport leggendo il file GPX (running, cycling, swimming)
-  ed esporta i file individuali in:
-  - output<ANNO>/Wxx/<Wxx>_<sport>_<ID>.json (es. output2026/W01/W01_corsa_123.json)
+  ed esporta:
+  - File individuali in output<ANNO>/Wxx/<Wxx>_<sport>_<ID>.json
+  - Un indice leggero globale in dashboard_index.json per l'interfaccia web.
   
   Saltando le attività già convertite (cache) per velocizzare l'esecuzione.
 """
@@ -180,13 +181,14 @@ def main():
         print("[ERRORE] Nessuna cartella anno trovata (es. 2026, 2027).")
         sys.exit(1)
 
-    sport_it_map = {
-        "running": "corsa",
-        "cycling": "bici",
-        "swimming": "nuoto"
+    sport_short_map = {
+        "running": "run",
+        "cycling": "bike",
+        "swimming": "swim"
     }
 
     count_processed = 0
+    dashboard_index = []
 
     for year_dir in sorted(year_dirs):
         year = year_dir.name
@@ -204,70 +206,94 @@ def main():
             week_name = week_dir.name
             week_out = out_base / week_name
             week_out.mkdir(exist_ok=True)
-        
-        files_by_id = defaultdict(dict)
-        for f in week_dir.iterdir():
-            if not f.is_file():
-                continue
-            m = re.match(r"activity_(\d+)\.(csv|gpx)", f.name, re.IGNORECASE)
-            if m:
-                files_by_id[m.group(1)][m.group(2).lower()] = f
-
-        for aid in sorted(files_by_id):
-            fmap = files_by_id[aid]
-            if "csv" not in fmap or "gpx" not in fmap:
-                print(f"  ! {week_name} - {aid}: CSV o GPX mancante, skip")
-                continue
-
-            # Determina lo sport e il nome file in anticipo per leggere la cache correttamente
-            # Non potendo leggere prima il file se non ne sappiamo il nome,
-            # lo calcoliamo dal GPX se la cache non è nota, oppure
-            # cerchiamo un file che corrisponda all'ID.
             
-            # Cerca se esiste già un file per questo aid
-            existing_cache = list(week_out.glob(f"{week_name}_*_{aid}.json"))
-            
-            if existing_cache:
-                # Cache trovata
-                pass # Non dobbiamo fare nulla, è già processato
-            else:
-                meta = parse_gpx_meta(fmap["gpx"])
-                sport_raw = meta["type"] if meta["type"] else "running"
+            files_by_id = defaultdict(dict)
+            for f in week_dir.iterdir():
+                if not f.is_file():
+                    continue
+                m = re.match(r"activity_(\d+)\.(csv|gpx)", f.name, re.IGNORECASE)
+                if m:
+                    files_by_id[m.group(1)][m.group(2).lower()] = f
+
+            for aid in sorted(files_by_id):
+                fmap = files_by_id[aid]
+                if "csv" not in fmap or "gpx" not in fmap:
+                    print(f"  ! {week_name} - {aid}: CSV o GPX mancante, skip")
+                    continue
+    
+                # Determina lo sport e il nome file in anticipo per leggere la cache correttamente
+                existing_cache = list(week_out.glob(f"{week_name}_*_{aid}.json"))
                 
-                # Mappa i tipi specifici Garmin negli sport base
-                if "swim" in sport_raw.lower():
-                    sport = "swimming"
-                elif "cycl" in sport_raw.lower() or "bike" in sport_raw.lower() or "ride" in sport_raw.lower():
-                    sport = "cycling"
+                act_obj = None
+                if existing_cache:
+                    # Cache trovata
+                    with open(existing_cache[0], "r", encoding="utf-8") as f:
+                        act_obj = json.load(f)
                 else:
-                    sport = "running"
+                    meta = parse_gpx_meta(fmap["gpx"])
+                    sport_raw = meta["type"] if meta["type"] else "running"
                     
-                sport_it = sport_it_map.get(sport, sport)
-                out_file = week_out / f"{week_name}_{sport_it}_{aid}.json"
+                    if "swim" in sport_raw.lower():
+                        sport = "swimming"
+                    elif "cycl" in sport_raw.lower() or "bike" in sport_raw.lower() or "ride" in sport_raw.lower():
+                        sport = "cycling"
+                    else:
+                        sport = "running"
+                        
+                    sport_short = sport_short_map.get(sport, sport)
+                    date_short = meta["date"][2:] if meta["date"] else "00-00-00"
+                    out_file = week_out / f"{week_name}_{date_short}_{sport_short}_{aid}.json"
+                        
+                    print(f"  -> [{week_name}] Parsing {sport} activity {aid} (original: {sport_raw})...")
                     
-                print(f"  -> [{week_name}] Parsing {sport} activity {aid} (original: {sport_raw})...")
-                
-                csv_data = parse_csv(fmap["csv"], sport)
+                    csv_data = parse_csv(fmap["csv"], sport)
+    
+                    act_obj = {
+                        "week":           week_name,
+                        "activity_id":    aid,
+                        "sport":          sport,
+                        "name":           meta["name"],
+                        "date":           meta["date"],
+                        "start_time_utc": meta["start_time_utc"],
+                        "start_time":     meta["start_time"],
+                        "type":           sport_raw,
+                        "laps":           csv_data["laps"],
+                        "summary":        csv_data["summary"],
+                    }
+                    
+                    with open(out_file, "w", encoding="utf-8") as out:
+                        json.dump(act_obj, out, ensure_ascii=False, indent=2)
+                    
+                    count_processed += 1
+                    
+                # Generazione Indice per Dashboard
+                if act_obj:
+                    summary = act_obj.get("summary")
+                    if not summary and act_obj.get("laps"):
+                        for l in act_obj["laps"]:
+                            if l.get("lap") == "Riepilogo" or l.get("intervallo") == "Riepilogo":
+                                summary = l
+                                break
+                                
+                    index_entry = {
+                        "activity_id": act_obj["activity_id"],
+                        "year": year,
+                        "week": act_obj["week"],
+                        "sport": act_obj["sport"],
+                        "name": act_obj.get("name"),
+                        "date": act_obj.get("date"),
+                        "start_time_utc": act_obj.get("start_time_utc"),
+                        "summary": summary or {}
+                    }
+                    dashboard_index.append(index_entry)
 
-                act_obj = {
-                    "week":           week_name,
-                    "activity_id":    aid,
-                    "sport":          sport,
-                    "name":           meta["name"],
-                    "date":           meta["date"],
-                    "start_time_utc": meta["start_time_utc"],
-                    "start_time":     meta["start_time"],
-                    "type":           sport_raw,
-                    "laps":           csv_data["laps"],
-                    "summary":        csv_data["summary"],
-                }
-                
-                with open(out_file, "w", encoding="utf-8") as out:
-                    json.dump(act_obj, out, ensure_ascii=False, indent=2)
-                
-                count_processed += 1
+    # Salva l'indice globale
+    index_file = base_dir / "dashboard_index.json"
+    with open(index_file, "w", encoding="utf-8") as f:
+        json.dump(dashboard_index, f, ensure_ascii=False, indent=2)
 
     print(f"\n[OK] Generati {count_processed} nuovi file JSON in totale.")
+    print(f"[OK] Aggiornato dashboard_index.json con {len(dashboard_index)} attività.")
     print("\n" + "="*50)
     print("[COMPLETATO] Tutte le conversioni aggiornate.")
     print("="*50 + "\n")

@@ -12512,5 +12512,30 @@
       "tempo_in_movimento": "2:54:23",
       "passo_medio_in_movimento": "6:08"
     }
+  },
+  {
+    "activity_id": "22927850189",
+    "year": "2026",
+    "week": "W21",
+    "sport": "swimming",
+    "name": "Piscina",
+    "date": "2026-05-18",
+    "start_time_utc": "2026-05-18T18:34:23.000Z",
+    "summary": {
+      "lap": "Riepilogo",
+      "stile": null,
+      "vasche": 45,
+      "distanza_m": 1125,
+      "tempo": "43:32",
+      "tempo_cumulato": "43:32",
+      "passo_medio": "2:19",
+      "passo_migliore": "0:57",
+      "swolf_medio": 47,
+      "fc_media_bpm": 129,
+      "fc_max_bpm": 158,
+      "totale_bracciate": 539,
+      "bracciate_medie": 12,
+      "calorie": 385
+    }
   }
 ]

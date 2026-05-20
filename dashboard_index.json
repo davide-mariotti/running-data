@@ -12537,5 +12537,44 @@
       "bracciate_medie": 12,
       "calorie": 385
     }
+  },
+  {
+    "activity_id": "22939900382",
+    "year": "2026",
+    "week": "W21",
+    "sport": "running",
+    "name": "W08 - Easy Run",
+    "date": "2026-05-19",
+    "start_time_utc": "2026-05-19T17:32:33.000Z",
+    "summary": {
+      "lap": "Riepilogo",
+      "tempo": "1:20:55",
+      "tempo_cumulato": "1:20:55",
+      "distanza_km": 12.05,
+      "passo_medio": "6:43",
+      "prp_medio": "6:43",
+      "fc_media_bpm": 141,
+      "fc_max_bpm": 151,
+      "ascesa_m": 53,
+      "discesa_m": 55,
+      "potenza_media_w": 250,
+      "wkg_medio": 3.62,
+      "potenza_max_w": 325,
+      "wkg_massimo": 4.71,
+      "cadenza_media_pam": 174,
+      "contatto_suolo_ms": 275,
+      "bilanciamento_tcs": "50.3% S / 49.7% D",
+      "lunghezza_passo_m": 0.86,
+      "oscillazione_verticale_cm": 8.1,
+      "rapporto_verticale_pct": 9.2,
+      "calorie": 837,
+      "temperatura_med": 21.1,
+      "passo_migliore": "5:28",
+      "cadenza_max_pam": 180,
+      "tempo_in_movimento": "1:20:51",
+      "passo_medio_in_movimento": "6:43",
+      "perdita_velocita_cms": null,
+      "perdita_velocita_pct": null
+    }
   }
 ]

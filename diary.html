@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diario dell'Allenatore AI — Davide Mariotti</title>
+    <meta name="description" content="Diario di allenamento triathlon generato dall'AI Coach. Leggi i report settimanali sulle performance e i progressi.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="diary.css">
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-icon">⚡</span>
+            <span class="logo-text">IRONMAN</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <p class="nav-label">NAVIGAZIONE</p>
+            <a href="dashboard.html" class="nav-btn" style="text-decoration: none;">
+                <span class="nav-icon">📊</span> Dashboard
+            </a>
+            <a href="diary.html" class="nav-btn active" style="text-decoration: none;">
+                <span class="nav-icon">📖</span> Diario Coach AI
+            </a>
+        </nav>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-footer" style="margin-top: auto;">
+            <p class="sidebar-footer-text">Ruolo AI:</p>
+            <p class="sidebar-footer-date" style="color:var(--emerald)">Coach di Triathlon</p>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+        <!-- HEADER -->
+        <header class="top-header">
+            <div class="header-left">
+                <h1>Diario dell'Allenatore AI</h1>
+                <p class="header-subtitle">Analisi settimanale e feedback sulla preparazione atletica</p>
+            </div>
+            <div class="header-right">
+                <div class="header-badge" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3); color: #a7f3d0;">
+                    <span class="badge-icon">🤖</span>
+                    <span>Gemini 3.5 Flash</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTROLS -->
+        <section class="diary-controls">
+            <button id="prevWeekBtn" class="control-btn" disabled>
+                <span>⬅️</span> Settimana Precedente
+            </button>
+            
+            <div class="week-selector-wrapper">
+                <select id="weekSelect" class="week-select">
+                    <option value="" disabled selected>Caricamento settimane...</option>
+                </select>
+            </div>
+            
+            <button id="nextWeekBtn" class="control-btn" disabled>
+                Settimana Successiva <span>➡️</span>
+            </button>
+        </section>
+
+        <!-- DIARY REPORT CONTAINER -->
+        <section class="diary-card">
+            <div id="diaryLoading" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 0;">
+                <div class="loading-spinner"></div>
+                <p style="margin-top: 1rem; color: var(--text-2);">Lettura del report in corso...</p>
+            </div>
+            
+            <div id="diaryContent" class="diary-content" style="display: none;">
+                <!-- Renders markdown here -->
+            </div>
+
+            <div id="diaryEmptyState" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">📝</div>
+                <p class="empty-state-title">Nessun Report Trovato</p>
+                <p class="empty-state-text">Non è ancora stato generato un report per questa settimana. Assicurati di aver registrato allenamenti in questo periodo e di aver avviato lo script per redigerlo.</p>
+                <code style="background:rgba(0,0,0,0.3); padding:0.4rem 0.8rem; border-radius:6px; font-size:0.85rem; color:#f43f5e; border:1px solid rgba(255,255,255,0.05)">python generate_diary.py</code>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Marked Library for Markdown Parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // State
+        let weekKeys = [];
+        let currentWeekIndex = -1;
+
+        // Dom Elements
+        const weekSelect = document.getElementById('weekSelect');
+        const prevWeekBtn = document.getElementById('prevWeekBtn');
+        const nextWeekBtn = document.getElementById('nextWeekBtn');
+        const diaryLoading = document.getElementById('diaryLoading');
+        const diaryContent = document.getElementById('diaryContent');
+        const diaryEmptyState = document.getElementById('diaryEmptyState');
+
+        // Load data on boot
+        async function init() {
+            try {
+                const res = await fetch('dashboard_index.json');
+                if (!res.ok) throw new Error("Impossibile caricare dashboard_index.json");
+                const rawData = await res.json();
+                
+                // Estrae tutte le combinazioni anno_settimana uniche
+                const weekMap = {};
+                rawData.forEach(item => {
+                    if (item.year && item.week) {
+                        const key = `${item.year}_${item.week}`;
+                        weekMap[key] = { year: item.year, week: item.week };
+                    }
+                });
+
+                // Ordina cronologicamente
+                weekKeys = Object.keys(weekMap).sort((a, b) => {
+                    const [yA, wA] = a.split('_');
+                    const [yB, wB] = b.split('_');
+                    if (yA !== yB) return parseInt(yA) - parseInt(yB);
+                    return parseInt(wA.replace('W', '')) - parseInt(wB.replace('W', ''));
+                });
+
+                if (weekKeys.length === 0) {
+                    showEmptyState();
+                    return;
+                }
+
+                // Popola il selettore
+                weekSelect.innerHTML = '';
+                weekKeys.forEach(key => {
+                    const [year, week] = key.split('_');
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.textContent = `${year} — Settimana ${week}`;
+                    weekSelect.appendChild(opt);
+                });
+
+                // Cerca l'ultima settimana che ha effettivamente un report generato
+                currentWeekIndex = await findLastGeneratedWeekIndex();
+                weekSelect.value = weekKeys[currentWeekIndex];
+
+                // Carica il report iniziale
+                loadWeekReport();
+
+                // Listeners
+                weekSelect.addEventListener('change', (e) => {
+                    currentWeekIndex = weekKeys.indexOf(e.target.value);
+                    loadWeekReport();
+                });
+
+                prevWeekBtn.addEventListener('click', () => {
+                    if (currentWeekIndex > 0) {
+                        currentWeekIndex--;
+                        weekSelect.value = weekKeys[currentWeekIndex];
+                        loadWeekReport();
+                    }
+                });
+
+                nextWeekBtn.addEventListener('click', () => {
+                    if (currentWeekIndex < weekKeys.length - 1) {
+                        currentWeekIndex++;
+                        weekSelect.value = weekKeys[currentWeekIndex];
+                        loadWeekReport();
+                    }
+                });
+
+            } catch (err) {
+                console.error(err);
+                showEmptyState("Errore nel caricamento dell'indice attività. Assicurati che il server locale sia attivo.");
+            }
+        }
+
+        // Trova l'ultimo report generato scorrendo all'indietro
+        async function findLastGeneratedWeekIndex() {
+            for (let i = weekKeys.length - 1; i >= 0; i--) {
+                const key = weekKeys[i];
+                try {
+                    const res = await fetch(`diary/${key}_report.md`, { method: 'GET' });
+                    if (res.ok) return i;
+                } catch (e) {}
+            }
+            return 0; // Ritorna la prima settimana se non trova nulla
+        }
+
+        // Funzione per caricare il report in markdown
+        async function loadWeekReport() {
+            showLoading();
+            updateButtonStates();
+            
+            const key = weekKeys[currentWeekIndex];
+            const reportUrl = `diary/${key}_report.md`;
+
+            try {
+                const res = await fetch(reportUrl);
+                if (res.status === 200) {
+                    const markdownText = await res.text();
+                    
+                    // Renderizzazione del markdown in HTML
+                    const htmlContent = marked.parse(markdownText);
+                    
+                    diaryContent.innerHTML = htmlContent;
+                    showContent();
+                } else {
+                    showEmptyState();
+                }
+            } catch (err) {
+                console.error(err);
+                showEmptyState();
+            }
+        }
+
+        function updateButtonStates() {
+            prevWeekBtn.disabled = (currentWeekIndex <= 0);
+            nextWeekBtn.disabled = (currentWeekIndex >= weekKeys.length - 1 || currentWeekIndex === -1);
+        }
+
+        function showLoading() {
+            diaryLoading.style.display = 'flex';
+            diaryContent.style.display = 'none';
+            diaryEmptyState.style.display = 'none';
+        }
+
+        function showContent() {
+            diaryLoading.style.display = 'none';
+            diaryContent.style.display = 'block';
+            diaryEmptyState.style.display = 'none';
+        }
+
+        function showEmptyState(msg = null) {
+            diaryLoading.style.display = 'none';
+            diaryContent.style.display = 'none';
+            diaryEmptyState.style.display = 'flex';
+            if (msg) {
+                document.querySelector('#diaryEmptyState .empty-state-text').textContent = msg;
+            }
+        }
+
+        // Boot
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

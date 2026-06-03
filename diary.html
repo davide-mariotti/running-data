@@ -32,223 +32,369 @@
 
         <div class="sidebar-divider"></div>
 
+        <!-- WEEK NAVIGATOR -->
+        <div class="sidebar-week-nav">
+            <p class="nav-label">SETTIMANA</p>
+
+            <div class="sidebar-selects-row">
+                <div class="sidebar-select-group">
+                    <label class="sidebar-select-label">Anno</label>
+                    <select id="yearSelect" class="sidebar-select"></select>
+                </div>
+                <div class="sidebar-select-group" style="flex:2">
+                    <label class="sidebar-select-label">Settimana</label>
+                    <select id="weekSelect" class="sidebar-select"></select>
+                </div>
+            </div>
+
+            <div class="sidebar-nav-arrows">
+                <button id="prevWeekBtn" class="arrow-btn" disabled>‹ Prec</button>
+                <div id="weekIndicator" class="week-indicator">
+                    <span id="weekLabel">—</span>
+                    <span id="weekCounter" class="week-counter"></span>
+                </div>
+                <button id="nextWeekBtn" class="arrow-btn" disabled>Succ ›</button>
+            </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Expand/Collapse all -->
+        <div class="sidebar-week-nav" style="gap:0.4rem">
+            <p class="nav-label">SEZIONI</p>
+            <div class="sidebar-nav-arrows">
+                <button id="expandAllBtn" class="arrow-btn">↕ Espandi tutto</button>
+                <button id="collapseAllBtn" class="arrow-btn">↕ Comprimi</button>
+            </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
         <div class="sidebar-footer" style="margin-top: auto;">
-            <p class="sidebar-footer-text">Ruolo AI:</p>
-            <p class="sidebar-footer-date" style="color:var(--emerald)">Coach di Triathlon</p>
+            <p class="sidebar-footer-text">Modello AI:</p>
+            <p class="sidebar-footer-date" style="color:var(--emerald)">Gemini 3.1 Pro</p>
         </div>
     </aside>
 
     <!-- MAIN -->
     <main class="main-content">
-
-        <!-- HEADER -->
         <header class="top-header">
             <div class="header-left">
                 <h1>Diario dell'Allenatore AI</h1>
                 <p class="header-subtitle">Analisi settimanale e feedback sulla preparazione atletica</p>
             </div>
             <div class="header-right">
-                <div class="header-badge" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3); color: #a7f3d0;">
-                    <span class="badge-icon">🤖</span>
-                    <span>Gemini 3.5 Flash</span>
+                <div class="header-badge" style="background:rgba(16,185,129,0.12);border-color:rgba(16,185,129,0.3);color:#a7f3d0;">
+                    <span class="badge-icon">🤖</span><span>AI Coach</span>
                 </div>
             </div>
         </header>
 
-        <!-- CONTROLS -->
-        <section class="diary-controls">
-            <button id="prevWeekBtn" class="control-btn" disabled>
-                <span>⬅️</span> Settimana Precedente
-            </button>
-            
-            <div class="week-selector-wrapper">
-                <select id="weekSelect" class="week-select">
-                    <option value="" disabled selected>Caricamento settimane...</option>
-                </select>
-            </div>
-            
-            <button id="nextWeekBtn" class="control-btn" disabled>
-                Settimana Successiva <span>➡️</span>
-            </button>
-        </section>
-
-        <!-- DIARY REPORT CONTAINER -->
         <section class="diary-card">
-            <div id="diaryLoading" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 0;">
+            <div id="diaryLoading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem 0;">
                 <div class="loading-spinner"></div>
-                <p style="margin-top: 1rem; color: var(--text-2);">Lettura del report in corso...</p>
+                <p style="margin-top:1rem;color:var(--text-2);">Lettura del report in corso...</p>
             </div>
-            
-            <div id="diaryContent" class="diary-content" style="display: none;">
-                <!-- Renders markdown here -->
-            </div>
-
-            <div id="diaryEmptyState" class="empty-state" style="display: none;">
+            <div id="diaryContent" class="diary-content" style="display:none;"></div>
+            <div id="diaryEmptyState" class="empty-state" style="display:none;">
                 <div class="empty-state-icon">📝</div>
                 <p class="empty-state-title">Nessun Report Trovato</p>
-                <p class="empty-state-text">Non è ancora stato generato un report per questa settimana. Assicurati di aver registrato allenamenti in questo periodo e di aver avviato lo script per redigerlo.</p>
-                <code style="background:rgba(0,0,0,0.3); padding:0.4rem 0.8rem; border-radius:6px; font-size:0.85rem; color:#f43f5e; border:1px solid rgba(255,255,255,0.05)">python generate_diary.py</code>
+                <p class="empty-state-text">Non è ancora stato generato un report per questa settimana.</p>
+                <code style="background:rgba(0,0,0,0.3);padding:0.4rem 0.8rem;border-radius:6px;font-size:0.85rem;color:#f43f5e;border:1px solid rgba(255,255,255,0.05)">python generate_diary.py</code>
             </div>
         </section>
-
     </main>
 
-    <!-- Marked Library for Markdown Parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-        // State
-        let weekKeys = [];
-        let currentWeekIndex = -1;
+    // ── State ──────────────────────────────────────────────────────────────
+    let weekKeys = [];
+    let weeksByYear = {};
+    let currentWeekIndex = -1;
 
-        // Dom Elements
-        const weekSelect = document.getElementById('weekSelect');
-        const prevWeekBtn = document.getElementById('prevWeekBtn');
-        const nextWeekBtn = document.getElementById('nextWeekBtn');
-        const diaryLoading = document.getElementById('diaryLoading');
-        const diaryContent = document.getElementById('diaryContent');
-        const diaryEmptyState = document.getElementById('diaryEmptyState');
+    const $ = id => document.getElementById(id);
+    const yearSelect    = $('yearSelect');
+    const weekSelect    = $('weekSelect');
+    const prevWeekBtn   = $('prevWeekBtn');
+    const nextWeekBtn   = $('nextWeekBtn');
+    const weekLabel     = $('weekLabel');
+    const weekCounter   = $('weekCounter');
+    const weekIndicator = $('weekIndicator');
+    const diaryLoading  = $('diaryLoading');
+    const diaryContent  = $('diaryContent');
+    const diaryEmpty    = $('diaryEmptyState');
 
-        // Load data on boot
-        async function init() {
-            try {
-                const res = await fetch('dashboard_index.json');
-                if (!res.ok) throw new Error("Impossibile caricare dashboard_index.json");
-                const rawData = await res.json();
-                
-                // Estrae tutte le combinazioni anno_settimana uniche
-                const weekMap = {};
-                rawData.forEach(item => {
-                    if (item.year && item.week) {
-                        const key = `${item.year}_${item.week}`;
-                        weekMap[key] = { year: item.year, week: item.week };
-                    }
-                });
+    // Quali sezioni sono aperte di default (per indice 0-based nel documento)
+    // 0=Apertura, 1=Sintesi, 2=Analisi, 3=Trend, 4=Giudizio, 5=Indicazioni
+    const DEFAULT_OPEN = new Set([0, 4]); // Apertura Coach e Giudizio Complessivo sempre aperti
 
-                // Ordina cronologicamente
-                weekKeys = Object.keys(weekMap).sort((a, b) => {
-                    const [yA, wA] = a.split('_');
-                    const [yB, wB] = b.split('_');
-                    if (yA !== yB) return parseInt(yA) - parseInt(yB);
-                    return parseInt(wA.replace('W', '')) - parseInt(wB.replace('W', ''));
-                });
+    // ── Init ───────────────────────────────────────────────────────────────
+    async function init() {
+        try {
+            const res = await fetch('dashboard_index.json');
+            if (!res.ok) throw new Error();
+            const rawData = await res.json();
 
-                if (weekKeys.length === 0) {
-                    showEmptyState();
-                    return;
+            const weekMap = {};
+            rawData.forEach(item => {
+                if (item.year && item.week) {
+                    const key = `${item.year}_${item.week}`;
+                    if (!weekMap[key]) weekMap[key] = { year: item.year, week: item.week };
                 }
+            });
 
-                // Popola il selettore
-                weekSelect.innerHTML = '';
-                weekKeys.forEach(key => {
-                    const [year, week] = key.split('_');
-                    const opt = document.createElement('option');
-                    opt.value = key;
-                    opt.textContent = `${year} — Settimana ${week}`;
-                    weekSelect.appendChild(opt);
-                });
+            weekKeys = Object.keys(weekMap).sort((a, b) => {
+                const [yA, wA] = a.split('_'), [yB, wB] = b.split('_');
+                return yA !== yB ? +yA - +yB : +wA.slice(1) - +wB.slice(1);
+            });
 
-                // Cerca l'ultima settimana che ha effettivamente un report generato
-                currentWeekIndex = await findLastGeneratedWeekIndex();
-                weekSelect.value = weekKeys[currentWeekIndex];
+            if (!weekKeys.length) { showEmpty(); return; }
 
-                // Carica il report iniziale
-                loadWeekReport();
+            weeksByYear = {};
+            weekKeys.forEach(key => {
+                const [y, w] = key.split('_');
+                (weeksByYear[y] = weeksByYear[y] || []).push(w);
+            });
 
-                // Listeners
-                weekSelect.addEventListener('change', (e) => {
-                    currentWeekIndex = weekKeys.indexOf(e.target.value);
-                    loadWeekReport();
-                });
+            // Popola anni
+            Object.keys(weeksByYear).sort().forEach(y => {
+                const o = document.createElement('option');
+                o.value = y; o.textContent = y;
+                yearSelect.appendChild(o);
+            });
 
-                prevWeekBtn.addEventListener('click', () => {
-                    if (currentWeekIndex > 0) {
-                        currentWeekIndex--;
-                        weekSelect.value = weekKeys[currentWeekIndex];
-                        loadWeekReport();
-                    }
-                });
+            currentWeekIndex = await findLastGeneratedWeekIndex();
+            syncSelectors(currentWeekIndex);
+            loadReport();
 
-                nextWeekBtn.addEventListener('click', () => {
-                    if (currentWeekIndex < weekKeys.length - 1) {
-                        currentWeekIndex++;
-                        weekSelect.value = weekKeys[currentWeekIndex];
-                        loadWeekReport();
-                    }
-                });
+            yearSelect.addEventListener('change', onYearChange);
+            weekSelect.addEventListener('change', onWeekChange);
+            prevWeekBtn.addEventListener('click', () => navigate(-1));
+            nextWeekBtn.addEventListener('click', () => navigate(+1));
+            $('expandAllBtn').addEventListener('click', () => toggleAllSections(true));
+            $('collapseAllBtn').addEventListener('click', () => toggleAllSections(false));
 
-            } catch (err) {
-                console.error(err);
-                showEmptyState("Errore nel caricamento dell'indice attività. Assicurati che il server locale sia attivo.");
-            }
+        } catch (e) {
+            showEmpty("Errore nel caricamento dell'indice attività.");
         }
+    }
 
-        // Trova l'ultimo report generato scorrendo all'indietro
-        async function findLastGeneratedWeekIndex() {
-            for (let i = weekKeys.length - 1; i >= 0; i--) {
-                const key = weekKeys[i];
-                try {
-                    const res = await fetch(`diary/${key}_report.md`, { method: 'GET' });
-                    if (res.ok) return i;
-                } catch (e) {}
-            }
-            return 0; // Ritorna la prima settimana se non trova nulla
-        }
+    function onYearChange() {
+        const y = yearSelect.value;
+        fillWeekSelect(y);
+        const firstKey = `${y}_${weeksByYear[y][0]}`;
+        currentWeekIndex = weekKeys.indexOf(firstKey);
+        weekSelect.value = weeksByYear[y][0];
+        loadReport();
+    }
 
-        // Funzione per caricare il report in markdown
-        async function loadWeekReport() {
-            showLoading();
-            updateButtonStates();
-            
-            const key = weekKeys[currentWeekIndex];
-            const reportUrl = `diary/${key}_report.md`;
+    function onWeekChange() {
+        currentWeekIndex = weekKeys.indexOf(`${yearSelect.value}_${weekSelect.value}`);
+        loadReport();
+    }
 
+    function fillWeekSelect(year) {
+        weekSelect.innerHTML = '';
+        (weeksByYear[year] || []).forEach(w => {
+            const o = document.createElement('option');
+            o.value = w;
+            o.textContent = `Sett. ${+w.slice(1)} (${w})`;
+            weekSelect.appendChild(o);
+        });
+    }
+
+    function syncSelectors(idx) {
+        const [y, w] = weekKeys[idx].split('_');
+        yearSelect.value = y;
+        fillWeekSelect(y);
+        weekSelect.value = w;
+    }
+
+    function navigate(dir) {
+        const ni = currentWeekIndex + dir;
+        if (ni < 0 || ni >= weekKeys.length) return;
+        currentWeekIndex = ni;
+        syncSelectors(ni);
+        loadReport();
+    }
+
+    async function findLastGeneratedWeekIndex() {
+        for (let i = weekKeys.length - 1; i >= 0; i--) {
             try {
-                const res = await fetch(reportUrl);
-                if (res.status === 200) {
-                    const markdownText = await res.text();
-                    
-                    // Renderizzazione del markdown in HTML
-                    const htmlContent = marked.parse(markdownText);
-                    
-                    diaryContent.innerHTML = htmlContent;
-                    showContent();
-                } else {
-                    showEmptyState();
+                const r = await fetch(`diary/${weekKeys[i]}_report.md`, { method: 'HEAD' });
+                if (r.ok) return i;
+            } catch(e) {}
+        }
+        return 0;
+    }
+
+    // ── Load & Render ──────────────────────────────────────────────────────
+    async function loadReport() {
+        showLoading();
+        updateNav();
+
+        const key = weekKeys[currentWeekIndex];
+        const [y, w] = key.split('_');
+        weekLabel.textContent  = `${y} — Sett. ${+w.slice(1)}`;
+        weekCounter.textContent = `${currentWeekIndex + 1}/${weekKeys.length}`;
+
+        try {
+            const res = await fetch(`diary/${key}_report.md`);
+            if (res.ok) {
+                diaryContent.innerHTML = marked.parse(await res.text());
+                enhance();
+                showContent();
+            } else {
+                showEmpty();
+            }
+        } catch(e) { showEmpty(); }
+    }
+
+    // ── Post-process: accordion + compact tables + workout cards ───────────
+    function enhance() {
+        // 1. Wrappa le tabelle in uno scroll container
+        diaryContent.querySelectorAll('table').forEach(t => {
+            if (t.parentElement.classList.contains('table-wrap')) return;
+            const w = document.createElement('div');
+            w.className = 'table-wrap';
+            t.parentNode.insertBefore(w, t);
+            w.appendChild(t);
+        });
+
+        // 2. Identifica i giri/vasche per nasconderli dentro un toggle
+        diaryContent.querySelectorAll('.table-wrap').forEach(tw => {
+            const thead = tw.querySelector('thead');
+            if (!thead) return;
+            const headerText = thead.textContent.toLowerCase();
+            // Tabella giri (ha colonne Giro/Vasca)
+            if (headerText.includes('giro') || headerText.includes('vasca')) {
+                const rows = tw.querySelectorAll('tbody tr').length;
+                const toggle = document.createElement('button');
+                toggle.className = 'lap-toggle';
+                toggle.innerHTML = `<span class="lap-toggle-icon">▶</span> Mostra dettaglio giri (${rows} righe)`;
+                toggle.addEventListener('click', () => {
+                    const open = tw.classList.toggle('laps-visible');
+                    toggle.innerHTML = open
+                        ? `<span class="lap-toggle-icon open">▼</span> Nascondi dettaglio giri`
+                        : `<span class="lap-toggle-icon">▶</span> Mostra dettaglio giri (${rows} righe)`;
+                });
+                tw.parentNode.insertBefore(toggle, tw);
+                tw.classList.add('laps-hidden');
+            }
+        });
+
+        // 3. Raccoglie tutti gli h2 e wrappa ogni sezione in accordion
+        const h2s = [...diaryContent.querySelectorAll('h2')];
+        h2s.forEach((h2, idx) => {
+            const title = h2.textContent.toLowerCase();
+
+            // Determina classe colore
+            let cls = 'acc-default';
+            if (title.includes('apertura') || title.match(/^\s*0\./))    cls = 'acc-intro';
+            else if (title.includes('sintesi') || title.match(/^\s*1\./)) cls = 'acc-summary';
+            else if (title.includes('analisi') || title.match(/^\s*2\./)) cls = 'acc-analysis';
+            else if (title.includes('trend')   || title.match(/^\s*3\./)) cls = 'acc-trend';
+            else if (title.includes('giudizio')|| title.match(/^\s*4\./)) cls = 'acc-verdict';
+            else if (title.includes('indicazioni')||title.match(/^\s*5\./))cls = 'acc-next';
+
+            // Crea wrapper accordion
+            const acc = document.createElement('div');
+            acc.className = `accordion ${cls}`;
+
+            // Header cliccabile
+            const header = document.createElement('div');
+            header.className = 'acc-header';
+            header.innerHTML = `
+                <span class="acc-title">${h2.textContent.trim()}</span>
+                <span class="acc-chevron">▾</span>
+            `;
+
+            // Body che contiene il contenuto
+            const body = document.createElement('div');
+            body.className = 'acc-body';
+            const inner = document.createElement('div');
+            inner.className = 'acc-inner';
+            body.appendChild(inner);
+
+            // Inserisci accordion prima dell'h2
+            h2.parentNode.insertBefore(acc, h2);
+            acc.appendChild(header);
+            acc.appendChild(body);
+            h2.remove(); // Rimuovi h2 originale (il titolo è già nell'header)
+
+            // Sposta i nodi fratelli nell'inner fino al prossimo h2
+            while (acc.nextSibling && acc.nextSibling.tagName !== 'H2') {
+                inner.appendChild(acc.nextSibling);
+            }
+
+            // Stato aperto/chiuso di default
+            const isOpen = DEFAULT_OPEN.has(idx);
+            if (isOpen) acc.classList.add('open');
+
+            // Toggle al click
+            header.addEventListener('click', () => acc.classList.toggle('open'));
+        });
+
+        // 4. Workout cards: h3 dentro .acc-analysis
+        diaryContent.querySelectorAll('.acc-analysis .acc-inner h3').forEach(h3 => {
+            const t = h3.textContent.toUpperCase();
+            const card = document.createElement('div');
+            card.className = 'workout-card ' + (
+                t.includes('CORSA') || t.includes('RUNNING') ? 'workout-run' :
+                t.includes('NUOTO') || t.includes('SWIM')    ? 'workout-swim':
+                t.includes('CICLIS')|| t.includes('BIKE') || t.includes('BICI') ? 'workout-bike' : ''
+            );
+            h3.parentNode.insertBefore(card, h3);
+            card.appendChild(h3);
+            while (card.nextSibling && card.nextSibling.tagName !== 'H3' && card.nextSibling.tagName !== 'HR') {
+                card.appendChild(card.nextSibling);
+            }
+        });
+
+        // 5. Rating badge nel giudizio
+        diaryContent.querySelectorAll('.acc-verdict .acc-inner p, .acc-verdict .acc-inner li').forEach(el => {
+            const ratings = ['ECCELLENTE','OTTIMA','BUONA','NELLA NORMA','DI SCARICO','INSUFFICIENTE','CRITICA'];
+            ratings.forEach(r => {
+                if (el.textContent.includes(`Rating: ${r}`) || el.textContent.includes(r)) {
+                    el.innerHTML = el.innerHTML.replace(
+                        new RegExp(`\\*?\\*?(${r})\\*?\\*?`, 'g'),
+                        `<span class="rating-badge rating-${r.replace(/\s+/g,'-').toLowerCase()}">$1</span>`
+                    );
                 }
-            } catch (err) {
-                console.error(err);
-                showEmptyState();
-            }
-        }
+            });
+        });
+    }
 
-        function updateButtonStates() {
-            prevWeekBtn.disabled = (currentWeekIndex <= 0);
-            nextWeekBtn.disabled = (currentWeekIndex >= weekKeys.length - 1 || currentWeekIndex === -1);
-        }
+    function toggleAllSections(open) {
+        diaryContent.querySelectorAll('.accordion').forEach(acc => {
+            open ? acc.classList.add('open') : acc.classList.remove('open');
+        });
+    }
 
-        function showLoading() {
-            diaryLoading.style.display = 'flex';
-            diaryContent.style.display = 'none';
-            diaryEmptyState.style.display = 'none';
-        }
+    // ── UI helpers ─────────────────────────────────────────────────────────
+    function updateNav() {
+        prevWeekBtn.disabled = currentWeekIndex <= 0;
+        nextWeekBtn.disabled = currentWeekIndex >= weekKeys.length - 1;
+    }
+    function showLoading() {
+        diaryLoading.style.display = 'flex';
+        diaryContent.style.display = 'none';
+        diaryEmpty.style.display   = 'none';
+    }
+    function showContent() {
+        diaryLoading.style.display = 'none';
+        diaryContent.style.display = 'block';
+        diaryEmpty.style.display   = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function showEmpty(msg) {
+        diaryLoading.style.display = 'none';
+        diaryContent.style.display = 'none';
+        diaryEmpty.style.display   = 'flex';
+        if (msg) $('diaryEmptyState').querySelector('.empty-state-text').textContent = msg;
+    }
 
-        function showContent() {
-            diaryLoading.style.display = 'none';
-            diaryContent.style.display = 'block';
-            diaryEmptyState.style.display = 'none';
-        }
-
-        function showEmptyState(msg = null) {
-            diaryLoading.style.display = 'none';
-            diaryContent.style.display = 'none';
-            diaryEmptyState.style.display = 'flex';
-            if (msg) {
-                document.querySelector('#diaryEmptyState .empty-state-text').textContent = msg;
-            }
-        }
-
-        // Boot
-        document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>

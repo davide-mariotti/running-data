@@ -221,7 +221,8 @@
     async function findLastGeneratedWeekIndex() {
         for (let i = weekKeys.length - 1; i >= 0; i--) {
             try {
-                const r = await fetch(`diary/${weekKeys[i]}_report.md`, { method: 'HEAD' });
+                const [y] = weekKeys[i].split('_');
+                const r = await fetch(`diary/${y}/${weekKeys[i]}_report.md`, { method: 'HEAD' });
                 if (r.ok) return i;
             } catch(e) {}
         }
@@ -239,7 +240,7 @@
         weekCounter.textContent = `${currentWeekIndex + 1}/${weekKeys.length}`;
 
         try {
-            const res = await fetch(`diary/${key}_report.md`);
+            const res = await fetch(`diary/${y}/${key}_report.md`);
             if (res.ok) {
                 diaryContent.innerHTML = marked.parse(await res.text());
                 enhance();

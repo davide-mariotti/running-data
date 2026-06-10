@@ -34,6 +34,7 @@ from datetime import date
 
 # --- Configurazione ---
 DIARY_DIR = Path("diary")
+HR_MAX_ATHLETE = 189  # FC Max dell'atleta — usata per calcolare l'Indice di Intensità Cardiaca
 
 # -------------------------------------------------------------------------
 # Caricamento .env
@@ -265,6 +266,21 @@ def build_activity_prompt_text(act: dict) -> str:
     if fc_med or fc_max:
         lines.append(f"- **Frequenza Cardiaca:** Media {fc_med or 'N/D'} bpm | Max {fc_max or 'N/D'} bpm")
 
+    # Indice di Intensità Cardiaca (rapporto FC media / FC Max atleta)
+    if fc_med and isinstance(fc_med, (int, float)) and fc_med > 0:
+        hr_intensity = (fc_med / HR_MAX_ATHLETE) * 100
+        if hr_intensity >= 92:
+            intensity_label = "SFORZO MASSIMALE — l'atleta ha dato tutto"
+        elif hr_intensity >= 85:
+            intensity_label = "SFORZO ELEVATO — forte ma con margine residuo"
+        elif hr_intensity >= 78:
+            intensity_label = "SFORZO MODERATO/CONSERVATIVO — gara gestita con prudenza"
+        elif hr_intensity >= 70:
+            intensity_label = "SFORZO CONSERVATIVO — nessuna spinta al limite"
+        else:
+            intensity_label = "SFORZO LEGGERO — ritmo controllato"
+        lines.append(f"- **Indice Intensità Cardiaca:** {hr_intensity:.1f}% della FC Max ({fc_med}/{HR_MAX_ATHLETE} bpm) → {intensity_label}")
+
     # Ascesa/discesa
     if s.get("ascesa_m"):
         disc_str = f" | Discesa: {s['discesa_m']} m" if s.get("discesa_m") else ""
@@ -452,6 +468,17 @@ def build_system_instruction() -> str:
         "- Gestione dei ritmi nei lunghi\n"
         "- Corretta distribuzione dell'intensità settimanale\n\n"
 
+        "### ANALISI INTENSITÀ CARDIACA IN GARA E IN ALLENAMENTO\n"
+        "- L'Indice di Intensità Cardiaca (FC media / FC Max atleta × 100) indica quanta riserva cardiaca è stata usata.\n"
+        "- ≥92%: Sforzo massimale, l'atleta ha dato tutto. Riconoscerlo esplicitamente.\n"
+        "- 85-91%: Sforzo elevato ma con margine. L'atleta ha corso forte ma non al limite.\n"
+        "- 78-84%: Sforzo moderato/conservativo. L'atleta ha gestito la gara prudentemente, NON ha dato il massimo.\n"
+        "- <78%: Sforzo leggero, molto conservativo.\n"
+        "- NON assumere MAI che in una gara l'atleta abbia dato il massimo. DEVI verificarlo con l'Indice di Intensità.\n"
+        "- In una mezza maratona: ≥90% è sforzo totale, 80-89% è gestione strategica, <80% è conservativo.\n"
+        "- ESEMPIO: FC media 175 bpm su FC Max 189 → 92.6% = ha dato tutto. "
+        "FC media 159 bpm su FC Max 189 → 84.1% = gara gestita con prudenza, non ha spinto al massimo.\n\n"
+
         "## STILE DEI REPORT\n"
         "Tecnico, analitico e motivante. Analizza i volumi e le frequenze cardio citando ESPLICITAMENTE le zone "
         "(es. 'FC media 137 bpm = Zona 2 bassa — ottima base aerobica'). Usa Markdown con titoli e tabelle. "
@@ -490,6 +517,20 @@ def build_user_prompt(week_id: str, year: int, week_num: int,
         f"{'=' * 72}\n"
         f"{activities_text}\n"
         f"{'=' * 72}\n\n"
+        f"## REGOLE DI STILE OBBLIGATORIE PER EVITARE RIPETITIVITÀ\n"
+        f"- L'apertura del coach (sezione 0) DEVE iniziare ogni settimana con un incipit COMPLETAMENTE diverso. "
+        f"MAI usare 'Davide, mettiamoci a sedere' o strutture simili ripetute. "
+        f"Varia radicalmente: usa metafore nuove, riferimenti al meteo/stagione, aneddoti legati ai dati, "
+        f"domande provocatorie, citazioni sportive, flashback su progressi specifici.\n"
+        f"- Le espressioni 'fai un bel respiro', 'guardami negli occhi', 'mettiti comodo', "
+        f"'apro il tuo diario', 'togliti le scarpe' sono VIETATE perché già abusate nei report precedenti.\n"
+        f"- Usa aggettivi, metafore e strutture sintattiche diverse da quelle dei report precedenti forniti come storico.\n"
+        f"- Per le analisi FC, varia il modo di esprimere i giudizi: usa analogie diverse, "
+        f"cambia il livello di dettaglio, a volte sii sintetico e diretto, altre volte narrativo.\n"
+        f"- Per il giudizio finale, NON usare sempre la stessa struttura 'Ti do X e non Y per un solo motivo:'. Cambia formato.\n"
+        f"- Leggi attentamente i report precedenti forniti e EVITA DELIBERATAMENTE di ricalcarne frasi, strutture e ritornelli.\n"
+        f"- Quando presenti l'Indice di Intensità Cardiaca per un'attività di gara, analizza se l'atleta "
+        f"ha dato il massimo o ha gestito lo sforzo con prudenza. Non dare mai per scontato che in gara si dia tutto.\n\n"
         f"Redigi il report settimanale dell'allenatore in Markdown (italiano) con questa struttura ESATTA:\n\n"
         f"## 0. APERTURA DEL COACH\n"
         f"Commento personale e contestuale sulla settimana (tono diretto, non generico).\n\n"
@@ -505,6 +546,7 @@ def build_user_prompt(week_id: str, year: int, week_num: int,
         f"- Analisi Oscillazione Verticale e Rapporto Verticale (economia di corsa)\n"
         f"- Analisi Cadenza (rispetto del target 175-185 spm)\n"
         f"- Analisi FC: zone, deriva cardiaca (confronto primo/ultimo giro), picchi\n"
+        f"- Analisi Indice di Intensità Cardiaca: in gara e allenamenti intensi, valuta la % di FC Max usata\n"
         f"- Per nuoto: SWOLF, bracciate, efficienza tecnica\n"
         f"- Per bici: potenza, W/kg, cadenza RPM\n\n"
         f"## 3. TREND E PROGRESSI / PUNTI CRITICI\n"
@@ -538,7 +580,7 @@ def call_gemini_api(api_key: str, system_instruction: str, user_prompt: str,
             "parts": [{"text": system_instruction}]
         },
         "generationConfig": {
-            "temperature": 0.3,
+            "temperature": 0.75,
         }
     }
 
@@ -657,10 +699,14 @@ def main():
     weeks_to_process.sort(key=lambda x: (x["year_int"], x["week_num"]))
     print(f"[INFO] Trovate {len(weeks_to_process)} settimane convertite.")
 
-    # 3. Carica report esistenti
+    # 3. Carica report esistenti (dalla struttura diary/{anno}/)
     previous_reports = []
     for wk in weeks_to_process:
-        report_file = DIARY_DIR / f"{wk['year']}_{wk['week_name']}_report.md"
+        year_dir = DIARY_DIR / wk['year']
+        report_file = year_dir / f"{wk['year']}_{wk['week_name']}_report.md"
+        # Fallback: cerca anche nella root di diary/ per retrocompatibilità
+        if not report_file.exists():
+            report_file = DIARY_DIR / f"{wk['year']}_{wk['week_name']}_report.md"
         if report_file.exists():
             try:
                 with open(report_file, "r", encoding="utf-8") as f:
@@ -712,7 +758,9 @@ def main():
 
     for wk in weeks_to_process:
         week_id = f"{wk['year']}_{wk['week_name']}"
-        report_file = DIARY_DIR / f"{week_id}_report.md"
+        year_dir = DIARY_DIR / wk['year']
+        year_dir.mkdir(parents=True, exist_ok=True)
+        report_file = year_dir / f"{week_id}_report.md"
 
         if report_file.exists() and not is_test_mode:
             continue
@@ -735,8 +783,8 @@ def main():
             print(f"  [WARNING] Nessuna attività valida per {week_id}, salto.")
             continue
 
-        # Storico ultimi 15 report
-        recent_history = previous_reports[-15:]
+        # Storico ultimi 12 report
+        recent_history = previous_reports[-12:]
         if recent_history:
             history_text = ""
             for r in recent_history:

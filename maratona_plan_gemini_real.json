@@ -1,0 +1,527 @@
+[
+    {
+        "settimana": "SETTIMANA 1 (W01)",
+        "date": "30 mar – 05 apr",
+        "fase": "FASE 1 – Costruzione di Base",
+        "note": "Prima settimana del piano. Approccio progressivo: nuoto solo tecnica (niente affanno), brick breve per abituarsi alla transizione.",
+        "giorni": {
+            "Lunedì": "Riposo",
+            "Martedì": "Riposo",
+            "Mercoledì": "13km FL - Easy Run Recovery 13.03km @ 6'58\"/km, FC 143bpm [Durata: 91 min, Corsa: 13km]",
+            "Giovedì": "R (8×400m @4'20\") - 11.28km totali @ 5'54\"/km, FC 156bpm [Durata: 66 min, Corsa: 11km]",
+            "Venerdì": "Riposo Assoluto",
+            "Sabato": "Lungo Easy - 25.04km @ 6'32\"/km, FC 145bpm [Durata: 164 min, Corsa: 25km]",
+            "Domenica": "Easy/Tempo Run - 11.23km @ 6'02\"/km, FC 151bpm [Durata: 68 min, Corsa: 11km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 2 (W02)",
+        "date": "06 apr – 12 apr",
+        "fase": "FASE 1 – Costruzione di Base",
+        "note": "Secondo blocco base. Si introducono i primi progressivi nel lungo domenicale. Nuoto: focus sulla trazione.",
+        "giorni": {
+            "Lunedì": "Riposo",
+            "Martedì": "12km FL - 12.1km @ 6'30\"/km, FC 143bpm [Durata: 79 min, Corsa: 12km]",
+            "Mercoledì": "FM (8km @4'45\") - Tempo Run 12.05km @ 5'29\"/km, FC 160bpm [Durata: 66 min, Corsa: 12km]",
+            "Giovedì": "Riposo",
+            "Venerdì": "Riposo Assoluto",
+            "Sabato": "12km FL - Easy Run 12.32km @ 6'53\"/km, FC 144bpm [Durata: 85 min, Corsa: 12km]",
+            "Domenica": "Lungo - 26.11km totali: 21km @ 6'20\" + 5km @ 4'55\" RMa, FC 146bpm [Durata: 161 min, Corsa: 26km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 3 (W03)",
+        "date": "13 apr – 19 apr",
+        "fase": "FASE 1 – Costruzione di Base",
+        "note": "Terza settimana: il volume cresce, le ripetute si allungano a 600m. Nuoto: prime sensazioni di scivolamento.",
+        "giorni": {
+            "Lunedì": "Riposo",
+            "Martedì": "13km FL - 13.11km @ 6'52\"/km, FC 144bpm [Durata: 90 min, Corsa: 13km]",
+            "Mercoledì": "R (6×600m @4'15\") - 12.22km totali @ 5'51\"/km, FC 156bpm [Durata: 71 min, Corsa: 12km]",
+            "Giovedì": "Riposo",
+            "Venerdì": "Riposo Assoluto",
+            "Sabato": "Lungo + Bici Z2 - 27.08km totali: 22km @ 6'20\" + 5km @ 4'50\" RMa, FC 147bpm | Bici Z2 30.41km [Durata: 244 min, Bici: 30km, Corsa: 27km]",
+            "Domenica": "12km FL - Easy Run 12.21km @ 6'13\"/km, FC 142bpm [Durata: 76 min, Corsa: 12km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 4 (W04)",
+        "date": "20 apr – 26 apr",
+        "fase": "FASE 1 – Costruzione di Base",
+        "note": "Settimana di scarico + TEST FC MAX. Brick ridotto. Corpo fresco per il test massimale di mercoledì.",
+        "giorni": {
+            "Lunedì": "Riposo",
+            "Martedì": "10km FL - 10.1km @ 6'33\"/km, FC 143bpm [Durata: 66 min, Corsa: 10km]",
+            "Mercoledì": "TEST FC MAX - Hill 5% Reps 5×300m @4'00\"/km, 10.11km @ 6'15\"/km, FC 147bpm [Durata: 63 min, Corsa: 10km]",
+            "Giovedì": "Riposo",
+            "Venerdì": "Easy Run - 10.4km @ 6'26\"/km, FC 144bpm [Durata: 67 min, Corsa: 10km]",
+            "Sabato": "Bici Z2 - 50.25km [Durata: 123 min, Bici: 50km]",
+            "Domenica": "Lungo Scarico + Bici Z2 - 15.11km totali: 10km @ 6'20\" + 5km @ 4'50\" RMa, FC 152bpm | Bici Z2 21.29km [Durata: 141 min, Bici: 21km, Corsa: 15km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 5 (W05)",
+        "date": "27 apr – 03 mag",
+        "fase": "FASE 1 – Costruzione di Base",
+        "note": "Ripresa dopo il test FC. Si allunga la distanza delle ripetute a 800m. Nuoto: primi 950m.",
+        "giorni": {
+            "Lunedì": "Nuoto (Corso) - Piscina [Durata: 40 min, Nuoto: 750m]",
+            "Martedì": "13km FL - 13.43km @ 6'23\"/km, FC 144bpm [Durata: 86 min, Corsa: 13km]",
+            "Mercoledì": "R (6×800m @4'30\") - 13.1km totali @ 5'40\"/km, FC 146bpm [Durata: 74 min, Corsa: 13km]",
+            "Giovedì": "Nuoto (Corso) - Piscina [Durata: 38 min, Nuoto: 625m]",
+            "Venerdì": "Easy Run - 13.21km @ 6'37\"/km, FC 141bpm [Durata: 87 min, Corsa: 13km]",
+            "Sabato": "Bici Z2 - 20.2km [Durata: 44 min, Bici: 20km]",
+            "Domenica": "Lungo + Bici Z2 - 26.21km totali: 21km @ 6'20\" + 5km @ 4'55\" RMa, FC 144bpm | Bici Z2 52.02km [Durata: 294 min, Bici: 52km, Corsa: 26km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 6 (W06)",
+        "date": "04 mag – 10 mag",
+        "fase": "FASE 1 – Costruzione di Base",
+        "note": "Fondo Medio settimanale. Il lungo domenicale è tutto a passo costante Z2. Bici sabato: mangiare e bere in sella.",
+        "giorni": {
+            "Lunedì": "Nuoto (Corso) - Piscina [Durata: 44 min, Nuoto: 725m]",
+            "Martedì": "8km FL - 8.09km @ 6'25\"/km, FC 141bpm [Durata: 52 min, Corsa: 8km]",
+            "Mercoledì": "Riposo",
+            "Giovedì": "Nuoto (Corso) - Piscina [Durata: 41 min, Nuoto: 550m]",
+            "Venerdì": "Riposo Assoluto",
+            "Sabato": "12km FL - Easy Run 12.23km @ 6'34\"/km, FC 140bpm [Durata: 80 min, Corsa: 12km]",
+            "Domenica": "6×1km alternato Z3 - 18.31km totali: 6×(1km Z3 + 1km FL), FC 146bpm [Durata: 107 min, Corsa: 18km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 7 (W07)",
+        "date": "11 mag – 17 mag",
+        "fase": "FASE 1 – Costruzione di Base",
+        "note": "Volume settimana in crescita. Ripetute 400m con volume aumentato (10×). Il lungo domenicale raggiunge i 28km.",
+        "giorni": {
+            "Lunedì": "Nuoto (Corso) - Piscina [Durata: 44 min, Nuoto: 900m]",
+            "Martedì": "13km FL - 13.11km @ 6'36\"/km, FC 139bpm [Durata: 86 min, Corsa: 13km]",
+            "Mercoledì": "R (10×400m @4'20\") - 13.08km totali @ 5'52\"/km, FC 149bpm [Durata: 77 min, Corsa: 13km]",
+            "Giovedì": "Nuoto (Corso) - Piscina [Durata: 43 min, Nuoto: 650m]",
+            "Venerdì": "Riposo Assoluto",
+            "Sabato": "BRICK (Bici + Corsa) - Bici 50.23km + Corsa 5.1km @ 6'07\"/km, FC 147bpm [Durata: 144 min, Bici: 50km, Corsa: 5km]",
+            "Domenica": "Lungo - 28.43km totali: 21km @ 6'20\" + 7km @ 5'15\", FC 148bpm [Durata: 175 min, Corsa: 28km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 8 (W08)",
+        "date": "18 mag – 24 mag",
+        "fase": "FASE 1 – Costruzione di Base",
+        "note": "Scarico: volume ridotto su tutti gli sport. Fartlek breve di mercoledì per mantenere la reattività.",
+        "giorni": {
+            "Lunedì": "Nuoto (Corso) - Piscina [Durata: 44 min, Nuoto: 1125m]",
+            "Martedì": "12km FL - 12.05km @ 6'43\"/km, FC 141bpm [Durata: 81 min, Corsa: 12km]",
+            "Mercoledì": "Riposo",
+            "Giovedì": "R (3×2km @4'45\") + Nuoto (Corso) - Corsa 13.11km @ 5'39\"/km, FC 151bpm | Swim corso 8 [Durata: 116 min, Corsa: 13km, Nuoto: 750m]",
+            "Venerdì": "Riposo Assoluto",
+            "Sabato": "BRICK (Bici Z3/Z4 + Corsa Z4) - Bici 52.58km, FC 141bpm + Corsa 8.41km @ 6'03\"/km, FC 156bpm [Durata: 175 min, Bici: 53km, Corsa: 8km]",
+            "Domenica": "Lungo - 25.17km totali: 17km @ 6'20\" + 6km @ 5'15\" + 2km @ 4'55\" RMa, FC 144bpm [Durata: 151 min, Corsa: 25km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 9 (W09)",
+        "date": "25 mag – 31 mag",
+        "fase": "FASE 2 – Progressione",
+        "note": "Ingresso in Fase 2: ripetute da 1000m, lunghezza FL a 14km. Nuoto: i primi 1000m continui in vasca.",
+        "giorni": {
+            "Lunedì": "Nuoto (Corso) - Swim corso 9 [Durata: 45 min, Nuoto: 750m]",
+            "Martedì": "Riposo",
+            "Mercoledì": "15km FL - Easy Run 15.14km @ 6'30\"/km, FC 137bpm [Durata: 98 min, Corsa: 15km]",
+            "Giovedì": "R (5×1km @4'25\") + Nuoto (Corso) - Corsa 13.14km @ 5'43\"/km, FC 149bpm | Swim corso 10 [Durata: 117 min, Corsa: 13km, Nuoto: 1175m]",
+            "Venerdì": "Riposo Assoluto",
+            "Sabato": "Bici Z2/Z3 - 61.16km [Durata: 130 min, Bici: 61km]",
+            "Domenica": "Lungo - 27.09km totali: 22km @ 6'20\" + 5km @ 4'55\" RMa, FC 143bpm [Durata: 165 min, Corsa: 27km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 10 (W10)",
+        "date": "01 giu – 07 giu",
+        "fase": "FASE 2 – Progressione",
+        "note": "FM con 9km a passo maratona veloce. Il lungo è progressivo su tre ritmi. La bici del sabato: più fluido e costante.",
+        "giorni": {
+            "Lunedì": "Nuoto (Corso) - Swim corso 11 [Durata: 33 min, Nuoto: 675m]",
+            "Martedì": "14km FL - 14.11km @ 6'45\"/km, FC 137bpm [Durata: 95 min, Corsa: 14km]",
+            "Mercoledì": "R 3×(1km @5'00\" / 1km @4'25\") - 12.24km totali @ 5'38\"/km, FC 155bpm [Durata: 69 min, Corsa: 12km]",
+            "Giovedì": "Nuoto (Corso) - Piscina [Durata: 42 min, Nuoto: 750m]",
+            "Venerdì": "Riposo Assoluto",
+            "Sabato": "Bici Z2/Z3 - 51.03km [Durata: 109 min, Bici: 51km]",
+            "Domenica": "Lungo Progressivo - 28.21km totali: 10km @ 6'25\" + 10km @ 5'50\" + 8km @ 5'15\", FC 146bpm [Durata: 164 min, Corsa: 28km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 11 (W11)",
+        "date": "08 giu – 14 giu",
+        "fase": "FASE 2 – Progressione",
+        "note": "Ripetute 800m con 7 serie: volume alto. Il lungo tocca i 29km con finale a RMa.",
+        "giorni": {
+            "Lunedì": "Nuoto (Corso) - Swim corso 13 [Durata: 43 min, Nuoto: 725m]",
+            "Martedì": "14km FL - 14.15km @ 6'12\"/km, FC 141bpm [Durata: 88 min, Corsa: 14km]",
+            "Mercoledì": "R (7×800m @4'25\") - 14.08km totali @ 5'40\"/km, FC 149bpm [Durata: 80 min, Corsa: 14km]",
+            "Giovedì": "Nuoto (Corso) - Swim corso 14 [Durata: 43 min, Nuoto: 875m]",
+            "Venerdì": "Riposo Assoluto",
+            "Sabato": "Bici Z2/Z3 - 62.08km [Durata: 131 min, Bici: 62km]",
+            "Domenica": "Lungo - 30.05km totali: 25km @ 6'20\" + 5km @ 4'55\" RMa, FC 145bpm [Durata: 178 min, Corsa: 30km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 12 (W12)",
+        "date": "15 giu – 21 giu",
+        "fase": "FASE 2 – Progressione",
+        "note": "Prima settimana Build. FL sale a 17km. Ripetute 1000m con 6 serie. Il lungo: 8km finali a RMa.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 2×300m con recupero 1', tecnica continua [Durata prevista: 40 min, Nuoto: 1050m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "R (1000m ×6) - R (1000m): 3.2km WU / 6×(1000m @4'35\" + 300m rest @6'30\") / 3.0km CD [Durata prevista: 70 min, Corsa: 14km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 4×150m con recupero 30\" [Durata prevista: 40 min, Nuoto: 1050m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo - 29km totali: 21km @ 6'20\" + ultimi 8km @ 4'55\" RMa [Durata prevista: 185 min, Corsa: 29km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 13 (W13)",
+        "date": "22 giu – 28 giu",
+        "fase": "FASE 2 – Progressione",
+        "note": "Trasferta ven/sab/dom. 🏅 GARA TEST 10km anticipata a mercoledì per salvare il test.",
+        "giorni": {
+            "Lunedì": "Nuoto leggero - 🌙 Nuoto 35' Z1 — solo scioltezza, respiro controllato [Durata prevista: 35 min, Nuoto: 800m]",
+            "Martedì": "10km FL - 10km FL — scarico pre-test @ 6'20\"/km [Durata prevista: 65 min, Corsa: 10km]",
+            "Mercoledì": "🏅 GARA TEST 10km - 🏅 GARA TEST (10km): 15km totali (3km WU + 10km @ 4'20\" all-out + 2km CD) [Durata prevista: 90 min, Corsa: 15km]",
+            "Giovedì": "Nuoto leggero - 🌙 Nuoto 35' Z1 — recupero, tecnica morbida [Durata prevista: 35 min, Nuoto: 800m]",
+            "Venerdì": "Riposo Assoluto (Trasferta) - Riposo completo in trasferta",
+            "Sabato": "Riposo (Trasferta) - Riposo o corsetta 20' Z1 leggerissima (opzionale)",
+            "Domenica": "Riposo Assoluto (Trasferta) - Riposo completo in trasferta"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 14 (W14)",
+        "date": "29 giu – 05 lug",
+        "fase": "FASE 3 – Build",
+        "note": "Ingresso Fase 3 Build. FM con 9km a passo sostenuto. Il lungo torna vicino ai 30km con finale RMa.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 3×250m con recupero 45\" [Durata prevista: 40 min, Nuoto: 1000m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "FM (11km) - FM (11km): 1km WU / 9km @ 4'45\" / 1km CD [Durata prevista: 70 min, Corsa: 11km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 2×300m + 100m tecnica [Durata prevista: 40 min, Nuoto: 1000m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo - 29km totali: 23km @ 6'20\" + ultimi 6km @ 4'55\" RMa [Durata prevista: 185 min, Corsa: 29km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 15 (W15)",
+        "date": "06 lug – 12 lug",
+        "fase": "FASE 3 – Build",
+        "note": "Trasferta ven/sab. Riposo nei giorni di viaggio e lungo spostato a domenica sera al rientro.",
+        "giorni": {
+            "Lunedì": "Nuoto leggero - 🌙 Nuoto 35' Z1 — tecnica, nessuna fatica [Durata prevista: 35 min, Nuoto: 800m]",
+            "Martedì": "13km FL - 13km FL — tutto @ 6'25\"/km, <142bpm [Durata prevista: 82 min, Corsa: 13km]",
+            "Mercoledì": "R (Allunghi) - R (Allunghi): 7km FL / 8×(100m @4'20\" + 100m rest @6'15\") / 1.4km CD [Durata prevista: 65 min, Corsa: 10km]",
+            "Giovedì": "Nuoto leggero - 🌙 Nuoto 35' Z1 — recupero in acqua [Durata prevista: 35 min, Nuoto: 800m]",
+            "Venerdì": "Riposo (Trasferta) - Riposo completo in trasferta",
+            "Sabato": "Riposo (Trasferta) - Riposo completo in trasferta",
+            "Domenica": "Lungo serale - 🏃 Lungo serale (rientro): 24km totali @ 6'20\" | Niente bici post-corsa [Durata prevista: 152 min, Corsa: 24km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 16 (W16)",
+        "date": "13 lug – 19 lug",
+        "fase": "FASE 3 – Build",
+        "note": "Ripetute da 1500m: lavoro di soglia progressivo. Il lungo sale a 30km con 10km finali a passo sostenuto.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 5×150m con recupero 30\", continuità [Durata prevista: 40 min, Nuoto: 1100m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "R (1500m) - R (1500m): 2.0km WU / 5×(1500m @4'40\" + 300m rest @6'30\") / 2.5km CD [Durata prevista: 75 min, Corsa: 12km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 2×400m con recupero 1' [Durata prevista: 40 min, Nuoto: 1100m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo - 30km totali: 20km @ 6'20\" + ultimi 10km @ 5'25\"/km [Durata prevista: 190 min, Corsa: 30km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 17 (W17)",
+        "date": "20 lug – 26 lug",
+        "fase": "FASE 3 – Build",
+        "note": "Ripetute lunghe: 2000m × 3. Il lungo include 10km finali a RMa. Primo assaggio del volume picco.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 3×300m con recupero 45\" [Durata prevista: 40 min, Nuoto: 1100m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "R (2000m) - R (2000m): 3.0km WU / 3×(2000m @4'40\" + 500m rest @6'30\") / 3.0km CD [Durata prevista: 75 min, Corsa: 12km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 600m continui Z2, poi tecnica [Durata prevista: 40 min, Nuoto: 1100m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 — gestisci idratazione e nutrizione [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo - 30km totali: 20km @ 6'20\" + 10km @ 4'55\" RMa [Durata prevista: 190 min, Corsa: 30km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 18 (W18)",
+        "date": "27 lug – 02 ago",
+        "fase": "FASE 3 – Build",
+        "note": "FM con 10km a passo maratona veloce. Lungo con 5km finali a RMa. La bici del sabato come recupero attivo.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 4×200m con recupero 40\" [Durata prevista: 40 min, Nuoto: 1100m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "FM (12km) - FM (12km): 1km WU / 10km @ 4'50\" / 1km CD [Durata prevista: 75 min, Corsa: 12km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 700m continui Z2 [Durata prevista: 40 min, Nuoto: 1100m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo - 30km totali: 25km @ 6'20\" + ultimi 5km @ 4'55\" RMa [Durata prevista: 190 min, Corsa: 30km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 19 (W19)",
+        "date": "03 ago – 09 ago",
+        "fase": "FASE 3 – Build",
+        "note": "Settimana più intensa della Fase 3. Ripetute 1000m × 7. Lungo progressivo su tre ritmi: 31km totali.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 4×250m con recupero 45\" [Durata prevista: 40 min, Nuoto: 1150m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "R (1000m ×7) - R (1000m): 4.0km WU / 7×(1000m @4'30\" + 300m rest @6'30\") / 3.0km CD [Durata prevista: 89 min, Corsa: 14km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 3×300m con recupero 1' [Durata prevista: 40 min, Nuoto: 1150m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo Progressivo - 31km Progressivo: 11km @ 6'20\" + 10km @ 5'40\" + 10km @ 5'05\" [Durata prevista: 195 min, Corsa: 31km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 20 (W20)",
+        "date": "10 ago – 16 ago",
+        "fase": "FASE 3 – Build",
+        "note": "Scarico post-blocco Build. Volume ridotto su tutti e tre gli sport. Il lungo scende a 19km con finale RMa.",
+        "giorni": {
+            "Lunedì": "Nuoto leggero - 🌙 Nuoto 35' Z1 — scioltezza, nessuna fatica [Durata prevista: 35 min, Nuoto: 800m]",
+            "Martedì": "11km FL - 11km FL — tutto @ 6'25\"/km, <142bpm [Durata prevista: 70 min, Corsa: 11km]",
+            "Mercoledì": "R (Fartlek leggero) - R (Fartlek): 2km WU / 5×(400m @4'35\" + 200m rest @6'00\") / 3km CD [Durata prevista: 55 min, Corsa: 8km]",
+            "Giovedì": "Nuoto leggero - 🌙 Nuoto 35' Z1 — recupero attivo in acqua [Durata prevista: 35 min, Nuoto: 800m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 (Scarico) - Bici 90' Z2 — scarico [Durata prevista: 90 min, Bici: 38km]",
+            "Domenica": "Lungo Scarico - (Scarico): 19km totali: 13km @ 6'25\" + ultimi 6km @ 4'55\" RMa [Durata prevista: 115 min, Corsa: 19km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 21 (W21)",
+        "date": "17 ago – 23 ago",
+        "fase": "FASE 3 – Build",
+        "note": "Inizio del blocco finale di costruzione prima del picco. FM lungo (12km). Lungo domenicale sfiora le 3 ore.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 4×250m con recupero 45\" [Durata prevista: 40 min, Nuoto: 1150m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "FM (12km) - FM (12km): 2km WU / 10km @ 4'45\" / 2km CD [Durata prevista: 75 min, Corsa: 14km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 3×300m con recupero 1' [Durata prevista: 40 min, Nuoto: 1150m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo - 31km totali: 10km FL + 11km @ 4'55\" RMa + 10km FL [Durata prevista: 195 min, Corsa: 31km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 22 (W22)",
+        "date": "24 ago – 30 ago",
+        "fase": "FASE 3 – Build",
+        "note": "Ripetute da 1000m con 8 ripetizioni. Lungo da 32km con finale a RMa.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 2×500m con recupero 1' [Durata prevista: 40 min, Nuoto: 1150m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "R (1000m ×8) - R (1000m): 3.0km WU / 8×(1000m @4'30\" + 300m rest @6'30\") / 3.0km CD [Durata prevista: 90 min, Corsa: 14km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 5×200m con recupero 30\" [Durata prevista: 40 min, Nuoto: 1150m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo - 32km totali: 24km @ 6'20\" + ultimi 8km @ 4'55\" RMa [Durata prevista: 205 min, Corsa: 32km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 23 (W23)",
+        "date": "31 ago – 06 set",
+        "fase": "FASE 3 – Build",
+        "note": "Fondo Medio da 13km. Lungo a ritmo FL costante con finale svelto.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 1000m continui [Durata prevista: 40 min, Nuoto: 1150m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "FM (13km) - FM (13km): 1.5km WU / 11km @ 4'50\" / 1.5km CD [Durata prevista: 80 min, Corsa: 14km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 10×100m con recupero 20\" [Durata prevista: 40 min, Nuoto: 1150m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo - 32km totali: 20km @ 6'20\" + 12km @ 5'25\"/km [Durata prevista: 205 min, Corsa: 32km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 24 (W24)",
+        "date": "07 set – 13 set",
+        "fase": "FASE 3 – Build",
+        "note": "Scarico pre-blocco picco. Solo allunghi di mercoledì e un lungo breve domenicale.",
+        "giorni": {
+            "Lunedì": "Nuoto leggero - 🌙 Nuoto 35' Z1 — scioltezza, curare la tecnica [Durata prevista: 35 min, Nuoto: 900m]",
+            "Martedì": "12km FL - 12km FL — tutto @ 6'25\"/km, <142bpm [Durata prevista: 77 min, Corsa: 12km]",
+            "Mercoledì": "R (Allunghi) - R (Allunghi): 6km FL / 10×(100m @4'20\" + 100m rest @6'15\") / 1km CD [Durata prevista: 55 min, Corsa: 9km]",
+            "Giovedì": "Nuoto leggero - 🌙 Nuoto 35' Z1 — recupero attivo in acqua [Durata prevista: 35 min, Nuoto: 900m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 (Scarico) - Bici 90' Z2 — scarico [Durata prevista: 90 min, Bici: 38km]",
+            "Domenica": "Lungo Scarico - (Scarico): 19km totali: 13km @ 6'25\" + ultimi 6km @ 5'25\"/km [Durata prevista: 115 min, Corsa: 19km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 25 (W25)",
+        "date": "14 set – 20 set",
+        "fase": "FASE 4 – Picco",
+        "note": "Inizio fase di Picco. Ripetute lunghe da 2000m (4x). Lungo da 32km con 10km finali a RMa.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 4×250m con recupero 45\" [Durata prevista: 40 min, Nuoto: 1200m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "R (2000m ×4) - R (2000m): 2.5km WU / 4×(2000m @4'35\" + 500m rest @6'30\") / 3.5km CD [Durata prevista: 85 min, Corsa: 14km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 3×300m con recupero 1' [Durata prevista: 40 min, Nuoto: 1200m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo - 32km totali: 22km FL @ 6'20\" + 10km @ 4'55\" RMa [Durata prevista: 205 min, Corsa: 32km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 26 (W26)",
+        "date": "21 set – 27 set",
+        "fase": "FASE 4 – Picco",
+        "note": "Fondo Medio importante (14km). Il lungo sale a 33km con finale a RMa.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 2×500m con recupero 1' [Durata prevista: 40 min, Nuoto: 1200m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "FM (14km) - FM (14km): 2km WU / 11km @ 4'45\" / 2km CD [Durata prevista: 85 min, Corsa: 15km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 5×200m con recupero 30\" [Durata prevista: 40 min, Nuoto: 1200m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo - 33km totali: 28km @ 6'15\" + ultimi 5km @ 4'55\" RMa [Durata prevista: 215 min, Corsa: 33km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 27 (W27)",
+        "date": "28 set – 04 ott",
+        "fase": "FASE 4 – Picco",
+        "note": "Ripetute lunghissime da 3000m (3x). Lungo da 33km con 10km a RMa.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 1200m continui [Durata prevista: 40 min, Nuoto: 1200m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "R (3000m ×3) - R (3000m): 3.0km WU / 3×(3000m @4'40\" + 500m rest @6'30\") / 4.0km CD [Durata prevista: 95 min, Corsa: 16km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 12×100m con recupero 20\" [Durata prevista: 40 min, Nuoto: 1200m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo - 33km totali: 23km FL + 10km @ 4'55\" RMa [Durata prevista: 215 min, Corsa: 33km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 28 (W28)",
+        "date": "05 ott – 11 ott",
+        "fase": "FASE 4 – Picco",
+        "note": "Scarico attivo con 🏅 GARA TEST (Mezza Maratona) domenica.",
+        "giorni": {
+            "Lunedì": "Nuoto leggero - 🌙 Nuoto 35' Z1 — scioltezza [Durata prevista: 35 min, Nuoto: 900m]",
+            "Martedì": "12km FL - 12km FL — tutto @ 6'25\"/km, <142bpm [Durata prevista: 77 min, Corsa: 12km]",
+            "Mercoledì": "R (Fartlek) - R (Fartlek): 2.5km WU / 8×(400m @4'35\" + 200m rest @6'00\") / 2.7km CD [Durata prevista: 60 min, Corsa: 10km]",
+            "Giovedì": "Nuoto leggero - 🌙 Nuoto 35' Z1 — recupero [Durata prevista: 35 min, Nuoto: 900m]",
+            "Venerdì": "Riposo Assoluto - Riposo pre-gara",
+            "Sabato": "Bici Z1/Z2 (Leggero) - Bici 60' Z1/Z2 [Durata prevista: 60 min, Bici: 26km]",
+            "Domenica": "🏅 GARA TEST 21km - 🏅 GARA TEST (21km): 23.1km totali (1km WU FL + 21.1km @ 4'40\" + 1km CD FL) | Niente bici oggi [Durata prevista: 110 min, Corsa: 23.1km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 29 (W29)",
+        "date": "12 ott – 18 ott",
+        "fase": "FASE 4 – Picco",
+        "note": "Settimana di Picco 1. FM importante (14km). Lungo da 33km con ben 20km a RMa.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 4×300m con recupero 45\" [Durata prevista: 40 min, Nuoto: 1250m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "FM (14km) - FM (14km): 2km WU / 12km @ 4'45\" / 2km CD [Durata prevista: 85 min, Corsa: 16km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 5×250m con recupero 30\" [Durata prevista: 40 min, Nuoto: 1250m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo - 33km totali: 13km FL + 20km @ 4'55\" RMa [Durata prevista: 215 min, Corsa: 33km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 30 (W30)",
+        "date": "19 ott – 25 ott",
+        "fase": "FASE 4 – Picco",
+        "note": "Settimana di Picco 2. Ripetute al limite: 4000m × 3. Lungo da 34km con 20km a RMa.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 1250m continui [Durata prevista: 40 min, Nuoto: 1250m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "R (4000m ×3) - R (4000m): 2.5km WU / 3×(4000m @4'45\" + 500m rest @6'30\") / 1.5km CD [Durata prevista: 95 min, Corsa: 16km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 6×200m con recupero 30\" [Durata prevista: 40 min, Nuoto: 1250m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo - 34km totali: 14km FL + 20km @ 4'55\" RMa [Durata prevista: 225 min, Corsa: 34km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 31 (W31)",
+        "date": "26 ott – 01 nov",
+        "fase": "FASE 4 – Picco",
+        "note": "Settimana di Picco 3. Il volume massimo del piano. FM 15km e Lungo lunghissimo da 36km con 20km a RMa.",
+        "giorni": {
+            "Lunedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 2×600m con recupero 1' [Durata prevista: 40 min, Nuoto: 1250m]",
+            "Martedì": "17km FL - 17km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 107 min, Corsa: 17km]",
+            "Mercoledì": "FM (15km) - FM (15km): 2km WU / 13km @ 4'45\" / 2km CD [Durata prevista: 90 min, Corsa: 17km]",
+            "Giovedì": "Nuoto endurance - 🌙 Nuoto 40' Z2 — 3×400m con recupero 45\" [Durata prevista: 40 min, Nuoto: 1250m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 - Bici 120' Z2 [Durata prevista: 120 min, Bici: 50km]",
+            "Domenica": "Lungo - 36km totali: 16km FL @ 6'15\" + 20km @ 4'55\" RMa [Durata prevista: 240 min, Corsa: 36km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 32 (W32)",
+        "date": "02 nov – 08 nov",
+        "fase": "FASE 5 – Tapering",
+        "note": "Inizio Tapering. Il volume scende bruscamente ma l'intensità resta. Lungo a 29km.",
+        "giorni": {
+            "Lunedì": "Nuoto leggero - 🌙 Nuoto 35' Z1 — scioltezza e recupero attivo [Durata prevista: 35 min, Nuoto: 900m]",
+            "Martedì": "16km FL - 16km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 100 min, Corsa: 16km]",
+            "Mercoledì": "FM (10km) - FM (10km): 1km WU / 8km @ 4'45\" / 1km CD [Durata prevista: 60 min, Corsa: 10km]",
+            "Giovedì": "Nuoto leggero - 🌙 Nuoto 35' Z1 — tecnica morbida [Durata prevista: 35 min, Nuoto: 900m]",
+            "Venerdì": "Riposo Assoluto - Riposo attivo / mobilità",
+            "Sabato": "Bici Z2 (Scarico) - Bici 90' Z2 [Durata prevista: 90 min, Bici: 38km]",
+            "Domenica": "Lungo Taper - 29km totali: 19km FL @ 6'20\" + 10km @ 4'55\" RMa [Durata prevista: 185 min, Corsa: 29km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 33 (W33)",
+        "date": "09 nov – 15 nov",
+        "fase": "FASE 5 – Tapering",
+        "note": "Tapering profondo. Mantenere le gambe brillanti con gli allunghi. Lungo a 20km.",
+        "giorni": {
+            "Lunedì": "Nuoto leggero - 🌙 Nuoto 30' Z1 — relax in vasca [Durata prevista: 30 min, Nuoto: 800m]",
+            "Martedì": "14km FL - 14km FL — tutto @ 6'20\"/km, <142bpm [Durata prevista: 89 min, Corsa: 14km]",
+            "Mercoledì": "R (Allunghi) - R (Allunghi): 8km FL + 5×(100m @4'15\" + 100m rest @6'15\") / 1km CD [Durata prevista: 60 min, Corsa: 10km]",
+            "Giovedì": "Nuoto leggero - 🌙 Nuoto 30' Z1 — tecnica [Durata prevista: 30 min, Nuoto: 800m]",
+            "Venerdì": "Riposo Assoluto - Riposo",
+            "Sabato": "Bici Z1/Z2 (Leggero) - Bici 60' Z1/Z2 [Durata prevista: 60 min, Bici: 26km]",
+            "Domenica": "Lungo Taper - 20km totali: 10km FL @ 6'20\" + 10km @ 4'55\" RMa [Durata prevista: 120 min, Corsa: 20km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 34 (W34)",
+        "date": "16 nov – 22 nov",
+        "fase": "FASE 5 – Tapering",
+        "note": "Penultima settimana. Volume cortissimo, FM breve per sentire il ritmo.",
+        "giorni": {
+            "Lunedì": "Nuoto scioltissimo - 🌙 Nuoto 30' Z1 — solo per muoversi [Durata prevista: 30 min, Nuoto: 700m]",
+            "Martedì": "11km FL - 11km FL — tutto @ 6'25\"/km, <142bpm [Durata prevista: 70 min, Corsa: 11km]",
+            "Mercoledì": "FM (9km) - FM (9km): 2.5km WU / 4km @ 4'55\" / 2.5km CD [Durata prevista: 50 min, Corsa: 9km]",
+            "Giovedì": "Nuoto scioltissimo - 🌙 Nuoto 30' Z1 [Durata prevista: 30 min, Nuoto: 700m]",
+            "Venerdì": "Riposo Assoluto - Riposo",
+            "Sabato": "Bici Agilità - Bici 45' Z1 — solo far girare le gambe [Durata prevista: 45 min, Bici: 20km]",
+            "Domenica": "Corsa 16km - 16km totali: tutti @ 6'25\"/km | Niente bici post [Durata prevista: 100 min, Corsa: 16km]"
+        }
+    },
+    {
+        "settimana": "SETTIMANA 35 (W35)",
+        "date": "23 nov – 29 nov",
+        "fase": "FASE 6 – Gara",
+        "note": "RACE WEEK! Carico di carboidrati. Riposo assoluto. Tensione che sale.",
+        "giorni": {
+            "Lunedì": "Riposo Assoluto - Recupero totale",
+            "Martedì": "9km FL - 9km FL — tutto @ 6'25\"/km, leggero [Durata prevista: 55 min, Corsa: 9km]",
+            "Mercoledì": "R (Allunghi) - R (Allunghi): 7km FL + 5×(100m @4'15\" + 100m rest @6'15\") / 1km CD [Durata prevista: 50 min, Corsa: 9km]",
+            "Giovedì": "Riposo Assoluto - Riposo totale",
+            "Venerdì": "Riposo Assoluto - Riposo totale e carboidrati",
+            "Sabato": "Attivazione - Corsa 15' Z1 — 2 allunghi e via [Durata prevista: 15 min, Corsa: 2.5km]",
+            "Domenica": "🏅 MARATONA FIRENZE - 🏅 MARATONA (42.195km): Primi 5km @ 5'05\", poi costante @ 4'53\"-4'55\" [Durata prevista: 210 min, Corsa: 42.195km]"
+        }
+    }
+]

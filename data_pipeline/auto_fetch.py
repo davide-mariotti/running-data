@@ -91,15 +91,26 @@ def main():
                 if act_id not in existing_ids:
                     logger.info(f"   ⬇️ Scarico nuova attività: {act_id} ({act.get('activityName', '')})")
                     try:
-                        # Scarica il file ZIP (contiene FIT) - supportato da garminconnect
+                        # Scarica CSV e GPX per essere compatibile con organize_inbox
                         from garminconnect import Garmin
-                        # Il formato originale (es. FIT) è il migliore per convert_all
-                        zip_data = sync.client.download_activity(act_id, dl_fmt=Garmin.ActivityDownloadFormat.ORIGINAL)
-                        zip_path = os.path.join(inbox_dir, f"{act_id}.zip")
-                        with open(zip_path, "wb") as f:
-                            f.write(zip_data)
+                        
+                        # Download CSV
+                        csv_data = sync.client.download_activity(act_id, dl_fmt=Garmin.ActivityDownloadFormat.CSV)
+                        csv_path = os.path.join(inbox_dir, f"activity_{act_id}.csv")
+                        with open(csv_path, "wb") as f:
+                            f.write(csv_data)
+                            
+                        # Download GPX (non tutte le attività lo hanno, ma proviamo)
+                        try:
+                            gpx_data = sync.client.download_activity(act_id, dl_fmt=Garmin.ActivityDownloadFormat.GPX)
+                            gpx_path = os.path.join(inbox_dir, f"activity_{act_id}.gpx")
+                            with open(gpx_path, "wb") as f:
+                                f.write(gpx_data)
+                        except Exception as e:
+                            logger.warning(f"      ⚠️ Impossibile scaricare GPX per {act_id} (potrebbe essere indoor): {e}")
+
                         activities_fetched += 1
-                        logger.info(f"      ✅ Salvato in {zip_path}")
+                        logger.info(f"      ✅ Salvati file CSV/GPX per {act_id} in inbox")
                     except Exception as download_err:
                         logger.error(f"      ❌ Errore download {act_id}: {download_err}")
     except Exception as e:

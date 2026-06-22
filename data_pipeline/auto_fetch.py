@@ -72,7 +72,7 @@ def main():
     index_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'dashboard_index.json')
     existing_ids = load_existing_activity_ids(index_path)
     
-    inbox_dir = os.path.join(os.path.dirname(__file__), '..', 'inbox')
+    inbox_dir = os.path.join(os.path.dirname(__file__), '..', 'data', 'inbox')
     os.makedirs(inbox_dir, exist_ok=True)
     
     activities_fetched = 0

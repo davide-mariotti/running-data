@@ -18,8 +18,6 @@ FUNZIONALITÀ:
   - Per ogni settimana, estrae TUTTE le metriche Garmin (TCS, bilanciamento,
     oscillazione verticale, cadenza, FC per giro, potenza, ecc.)
   - Genera analisi individuale per ogni singolo allenamento
-  - Per le settimane PASSATE: omette i consigli per la settimana successiva
-  - Per le settimane FUTURE: include indicazioni concrete
   - Usa Gemini 2.5 Pro (il modello top di Google con reasoning esteso)
 """
 
@@ -33,14 +31,15 @@ from pathlib import Path
 from datetime import date
 
 # --- Configurazione ---
-DIARY_DIR = Path("diary")
+ROOT_DIR = Path(__file__).parent.parent
+DIARY_DIR = ROOT_DIR / "frontend" / "diary"
 HR_MAX_ATHLETE = 189  # FC Max dell'atleta — usata per calcolare l'Indice di Intensità Cardiaca
 
 # -------------------------------------------------------------------------
 # Caricamento .env
 # -------------------------------------------------------------------------
 def load_env():
-    env_path = Path(".env")
+    env_path = ROOT_DIR / ".env"
     if not env_path.exists():
         return {}
     env = {}
@@ -55,18 +54,6 @@ def load_env():
     return env
 
 # -------------------------------------------------------------------------
-# Rilevamento settimana passata
-# -------------------------------------------------------------------------
-def is_past_week(year: int, week_num: int) -> bool:
-    """Restituisce True se la settimana ISO è già trascorsa rispetto ad oggi."""
-    today = date.today()
-    current_year, current_week, _ = today.isocalendar()
-    if year < current_year:
-        return True
-    if year == current_year and week_num < current_week:
-        return True
-    return False
-
 # -------------------------------------------------------------------------
 # Estrazione metriche complete dal JSON Garmin
 # -------------------------------------------------------------------------
@@ -492,22 +479,11 @@ def build_system_instruction() -> str:
 def build_user_prompt(week_id: str, year: int, week_num: int,
                       activities_text: str, history_text: str) -> str:
     today_str = date.today().strftime("%d/%m/%Y")
-    past = is_past_week(year, week_num)
-
-    future_section_note = (
-        "\n\n**ISTRUZIONE IMPORTANTE:** La settimana analizzata è GIÀ PASSATA. "
-        "NON includere la sezione '5. Indicazioni per la settimana successiva' — Davide ha già completato quelle sessioni. "
-        "Fermati al giudizio complessivo."
-        if past else
-        "\n\n**ISTRUZIONE IMPORTANTE:** La settimana analizzata è ATTUALE o FUTURA. "
-        "Includi obbligatoriamente la sezione '5. Indicazioni concrete per la settimana successiva'."
-    )
 
     prompt = (
         f"DATA ODIERNA: {today_str}\n"
         f"SETTIMANA IN ANALISI: {week_id} (Anno {year}, Settimana ISO {week_num})\n"
-        f"SETTIMANA PASSATA: {'SÌ' if past else 'NO'}\n"
-        f"{future_section_note}\n\n"
+        f"\n**ISTRUZIONE IMPORTANTE:** NON includere MAI indicazioni per la settimana successiva. Fermati al giudizio complessivo.\n\n"
         f"{'=' * 72}\n"
         f"STORICO REPORT PRECEDENTI (ultime settimane, per confronto):\n"
         f"{'=' * 72}\n"
@@ -554,11 +530,6 @@ def build_user_prompt(week_id: str, year: int, week_num: int,
         f"## 4. GIUDIZIO COMPLESSIVO DEL COACH\n"
         f"Rating: ECCELLENTE / OTTIMA / BUONA / NELLA NORMA / DI SCARICO / INSUFFICIENTE / CRITICA\n"
         f"Motivazione sintetica del giudizio.\n"
-        + (
-            "" if past else
-            "\n\n## 5. INDICAZIONI CONCRETE PER LA SETTIMANA SUCCESSIVA\n"
-            "Prescrizioni specifiche con target di FC, passo, volume per ogni sessione.\n"
-        )
     )
     return prompt
 
@@ -672,9 +643,9 @@ def main():
     DIARY_DIR.mkdir(exist_ok=True)
 
     # 2. Scansione cartelle output
-    base_dir = Path(__file__).parent
+    data_dir = ROOT_DIR / "data"
     output_dirs = sorted([
-        d for d in base_dir.iterdir()
+        d for d in data_dir.iterdir()
         if d.is_dir() and re.match(r"^output\d{4}$", d.name)
     ])
 

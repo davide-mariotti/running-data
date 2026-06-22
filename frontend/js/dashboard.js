@@ -4,7 +4,7 @@ const DATA_URL = 'dashboard_index.json';
 // State
 let rawData = [], filteredData = [];
 let activeYears = new Set(), availableYears = [];
-let activeSport = 'all', volumeUnit = 'km';
+let activeSport = 'running', volumeUnit = 'km';
 let chartYoY = null, chartEfficiency = null, chartWeekly = null;
 
 Chart.defaults.color = '#8b9bc8';
@@ -52,13 +52,24 @@ function heatLevel(min) {
     if (min < 80) return 2;  if (min < 120) return 3; return 4;
 }
 
-function hrToColor(hr) {
-    if (!hr || hr < 100) return 'rgba(148,163,184,0.7)';
-    if (hr < 130) return 'rgba(16,185,129,0.8)';
-    if (hr < 145) return 'rgba(59,130,246,0.8)';
-    if (hr < 158) return 'rgba(234,179,8,0.8)';
-    if (hr < 170) return 'rgba(249,115,22,0.8)';
-    return 'rgba(239,68,68,0.85)';
+function hrToColor(hr, sport = 'running') {
+    if (!hr || hr < 80) return 'rgba(148,163,184,0.7)'; // Sotto zona
+    
+    let z1, z2, z3, z4;
+    if (sport === 'cycling') {
+        z1 = 122; z2 = 142; z3 = 157; z4 = 172;
+    } else if (sport === 'swimming') {
+        z1 = 115; z2 = 135; z3 = 150; z4 = 165;
+    } else {
+        // running default
+        z1 = 130; z2 = 150; z3 = 165; z4 = 180;
+    }
+
+    if (hr <= z1) return 'rgba(148,163,184,0.8)'; // ⚪ Z1 Grigio
+    if (hr <= z2) return 'rgba(59,130,246,0.8)';  // 🔵 Z2 Blu
+    if (hr <= z3) return 'rgba(16,185,129,0.8)';  // 🟢 Z3 Verde
+    if (hr <= z4) return 'rgba(249,115,22,0.8)';  // 🟠 Z4 Arancione
+    return 'rgba(239,68,68,0.85)';                // 🔴 Z5 Rosso
 }
 
 const YEAR_COLORS = [
@@ -81,7 +92,15 @@ async function loadData() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         rawData = await res.json();
         availableYears = [...new Set(rawData.map(a => a.year))].sort();
-        activeYears = new Set(availableYears);
+        
+        // Seleziona l'anno attuale di default, altrimenti l'ultimo disponibile
+        const currentYear = new Date().getFullYear().toString();
+        if (availableYears.includes(currentYear)) {
+            activeYears = new Set([currentYear]);
+        } else if (availableYears.length > 0) {
+            activeYears = new Set([availableYears[availableYears.length - 1]]);
+        }
+        
         initFilters();
         applyFilters();
         hideLoading();
@@ -100,6 +119,12 @@ function hideLoading() {
 function initFilters() {
     // Sport buttons
     document.querySelectorAll('.nav-btn[data-sport]').forEach(btn => {
+        if (btn.dataset.sport === activeSport) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+        
         btn.addEventListener('click', () => {
             document.querySelectorAll('.nav-btn[data-sport]').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -122,7 +147,7 @@ function initFilters() {
     const container = document.getElementById('yearFilters');
     availableYears.forEach(year => {
         const btn = document.createElement('button');
-        btn.className = 'year-btn active';
+        btn.className = activeYears.has(year) ? 'year-btn active' : 'year-btn';
         btn.dataset.year = year;
         const count = rawData.filter(a => a.year === year).length;
         btn.innerHTML = `${year} <span class="year-count">${count}</span>`;
@@ -157,6 +182,118 @@ function applyFilters() {
     renderEfficiencyChart();
     renderHeatmap();
     renderWeeklyChart();
+    updateACWR();
+}
+
+// ── ACWR Dinamico ─────────────────────────────────────────
+function updateACWR() {
+    // Filtro runs per lo sport attivo (senza filtro anno, il carico considera sempre gli ultimi 28gg dalla data più recente)
+    const runs = rawData.filter(a => activeSport === 'all' || a.sport === activeSport);
+    
+    if (!runs.length) return;
+    
+    const dates = runs.map(r => r.date).filter(Boolean).sort();
+    if (!dates.length) return;
+    
+    const latestDateStr = dates[dates.length - 1];
+    const refDate = new Date(latestDateStr + 'T00:00:00');
+    
+    function formatDateLocal(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+    
+    const acuteStart = new Date(refDate); acuteStart.setDate(acuteStart.getDate() - 7);
+    const chronicStart = new Date(refDate); chronicStart.setDate(chronicStart.getDate() - 28);
+    const prevStart = new Date(refDate); prevStart.setDate(prevStart.getDate() - 14);
+    
+    const acuteStr = formatDateLocal(acuteStart);
+    const chronicStr = formatDateLocal(chronicStart);
+    const prevStr = formatDateLocal(prevStart);
+    
+    let acuteKm = 0, chronicKmTotal = 0, prevKm = 0;
+    let easyMin = 0, hardMin = 0;
+    
+    runs.forEach(r => {
+        if (!r.date) return;
+        const dStr = r.date;
+        const dKm = getDistance(r.summary, r.sport);
+        const dMin = getDurationMin(r.summary);
+        const hr = getHR(r.summary);
+        
+        if (dStr > chronicStr && dStr <= latestDateStr) {
+            chronicKmTotal += dKm;
+        }
+        if (dStr > acuteStr && dStr <= latestDateStr) {
+            acuteKm += dKm;
+            if (hr <= 150) easyMin += dMin; 
+            else if (hr > 150) hardMin += dMin;
+        }
+        if (dStr > prevStr && dStr <= acuteStr) {
+            prevKm += dKm;
+        }
+    });
+    
+    const chronicWeekly = chronicKmTotal / 4;
+    const acwr = chronicWeekly > 0 ? (acuteKm / chronicWeekly) : 0;
+    const rampRate = prevKm > 0 ? ((acuteKm - prevKm) / prevKm) * 100 : 0;
+    const totalMin = easyMin + hardMin;
+    const easyPct = totalMin > 0 ? (easyMin / totalMin) * 100 : 0;
+    const hardPct = totalMin > 0 ? (hardMin / totalMin) * 100 : 0;
+    
+    // Aggiorna la UI della dashboard
+    const elAcute = document.getElementById('load-acute-km');
+    if (elAcute) elAcute.textContent = `${acuteKm.toFixed(1)} km`;
+    
+    const elChronic = document.getElementById('load-chronic-km');
+    if (elChronic) elChronic.textContent = `${chronicWeekly.toFixed(1)} km/sett`;
+    
+    const elRamp = document.getElementById('load-ramp');
+    if (elRamp) elRamp.textContent = `${rampRate >= 0 ? '+' : ''}${rampRate.toFixed(0)}%`;
+    
+    const elEasy = document.getElementById('load-easy');
+    if (elEasy) elEasy.textContent = `${easyPct.toFixed(0)}%`;
+    
+    const elHard = document.getElementById('load-hard');
+    if (elHard) elHard.textContent = `${hardPct.toFixed(0)}%`;
+    
+    const acwrEl = document.getElementById('load-acwr');
+    const acwrStatus = document.getElementById('load-acwr-status');
+    const metricLoadVal = document.getElementById('metric-load-value');
+    const metricLoadTrend = document.getElementById('metric-load-trend');
+    
+    if (metricLoadVal) metricLoadVal.textContent = acwr.toFixed(2);
+    
+    if (acwrEl && acwrStatus) {
+        acwrEl.textContent = acwr.toFixed(2);
+        if (acwr >= 0.8 && acwr <= 1.3) {
+            acwrEl.className = 'load-value load-acwr-value acwr-safe';
+            acwrStatus.textContent = '✅ Sicuro';
+            acwrStatus.className = 'load-status status-safe';
+            if (metricLoadTrend) {
+                metricLoadTrend.className = 'metric-trend trend-stable';
+                metricLoadTrend.textContent = 'Ottimale';
+            }
+        } else if (acwr > 1.3 && acwr <= 1.5) {
+            acwrEl.className = 'load-value load-acwr-value acwr-warning';
+            acwrStatus.textContent = '⚠️ Attenzione';
+            acwrStatus.className = 'load-status status-warning';
+            if (metricLoadTrend) {
+                metricLoadTrend.className = 'metric-trend trend-down';
+                metricLoadTrend.textContent = 'Elevato';
+            }
+        } else {
+            acwrEl.className = 'load-value load-acwr-value acwr-danger';
+            acwrStatus.textContent = '🔴 Rischio';
+            acwrStatus.className = 'load-status status-danger';
+            if (metricLoadTrend) {
+                metricLoadTrend.className = 'metric-trend trend-down';
+                metricLoadTrend.textContent = 'Rischio';
+            }
+        }
+    }
 }
 
 // ── KPIs ──────────────────────────────────────────────────
@@ -235,7 +372,7 @@ function renderEfficiencyChart() {
     let tooltipCb = {};
 
     if (sport === 'running') {
-        subtitle = 'Passo medio (sec/km) vs Settimana — colore per FC Media (🟢Z1 🔵Z2 🟡Z3 🟠Z4 🔴Z5)';
+        subtitle = 'Passo medio (sec/km) vs Settimana — colore per FC Media (⚪Z1 🔵Z2 🟢Z3 🟠Z4 🔴Z5)';
         yLabel = 'Passo (sec/km) — più basso = più veloce'; reverseY = true;
         tooltipCb = {
             title: items => items[0].raw.name || `Sett. ${items[0].parsed.x}`,
@@ -247,11 +384,11 @@ function renderEfficiencyChart() {
         });
         Object.entries(byYear).sort().forEach(([yr, pts], i) => {
             const c = YEAR_COLORS[i % YEAR_COLORS.length];
-            datasets.push({ label:`${yr} — Corsa`, data:pts, backgroundColor:pts.map(p=>hrToColor(p.hr)),
+            datasets.push({ label:`${yr} — Corsa`, data:pts, backgroundColor:pts.map(p=>hrToColor(p.hr, 'running')),
                 borderColor:c.line, borderWidth:1, pointRadius:6, pointHoverRadius:9, parsing:false });
         });
     } else if (sport === 'cycling') {
-        subtitle = 'Velocità media (km/h) vs Settimana — colore per FC Media (🟢Z1 🔵Z2 🟡Z3 🟠Z4 🔴Z5)';
+        subtitle = 'Velocità media (km/h) vs Settimana — colore per FC Media (⚪Z1 🔵Z2 🟢Z3 🟠Z4 🔴Z5)';
         yLabel = 'Velocità media (km/h) — più alto = più efficiente'; reverseY = false;
         tooltipCb = {
             title: items => items[0].raw.name || `Sett. ${items[0].parsed.x}`,
@@ -263,7 +400,7 @@ function renderEfficiencyChart() {
         });
         Object.entries(byYear).sort().forEach(([yr, pts], i) => {
             const c = YEAR_COLORS[i % YEAR_COLORS.length];
-            datasets.push({ label:`${yr} — Bici`, data:pts, backgroundColor:pts.map(p=>hrToColor(p.hr)),
+            datasets.push({ label:`${yr} — Bici`, data:pts, backgroundColor:pts.map(p=>hrToColor(p.hr, 'cycling')),
                 borderColor:c.line, borderWidth:1, pointRadius:6, pointHoverRadius:9, parsing:false });
         });
     } else {
@@ -463,5 +600,4 @@ function groupByYear(acts, mapFn) {
     return out;
 }
 
-// ── Boot ──────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', loadData);
+// Boot is now handled by app.js after login

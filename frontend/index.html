@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Coach | Dashboard</title>
+    <meta name="description"
+        content="Dashboard multi-anno per analizzare i progressi di allenamento verso l'Ironman 70.3. Visualizza volume cumulativo, efficienza aerobica e costanza settimanale.">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏃‍♂️</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Firebase SDK (compat mode per semplicità) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<body>
+
+    <!-- ═══ LOGIN SCREEN ═══ -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-card">
+            <div class="login-logo">🏃</div>
+            <h1 class="login-title">Agentic Running Coach</h1>
+            <p class="login-subtitle">Il tuo coach AI autonomo</p>
+            <form id="login-form" class="login-form">
+                <div class="input-group">
+                    <label for="login-email">📧 Email</label>
+                    <input type="email" id="login-email" placeholder="la-tua@email.com" required>
+                </div>
+                <div class="input-group">
+                    <label for="login-password">🔒 Password</label>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn-login" id="btn-login">
+                    <span class="btn-text">Entra</span>
+                    <span class="btn-loader" style="display:none">⏳</span>
+                </button>
+                <p id="login-error" class="login-error"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app-container" style="display:none; width:100%; height:100%;">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">IRONMAN</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <p class="nav-label">SPORT</p>
+                <button id="filter-all" class="nav-btn active" data-sport="all">
+                    <span class="nav-icon">🏆</span> Tutti
+                </button>
+                <button id="filter-running" class="nav-btn" data-sport="running">
+                    <span class="nav-icon">🏃</span> Corsa
+                </button>
+                <button id="filter-cycling" class="nav-btn" data-sport="cycling">
+                    <span class="nav-icon">🚴</span> Bici
+                </button>
+                <button id="filter-swimming" class="nav-btn" data-sport="swimming">
+                    <span class="nav-icon">🏊</span> Nuoto
+                </button>
+
+                <p class="nav-label" style="margin-top: 1rem;">COACHING</p>
+                <a href="diary.html" class="nav-btn" style="text-decoration: none;">
+                    <span class="nav-icon">📖</span> Diario Coach AI
+                </a>
+            </nav>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="sidebar-years" id="yearFilters">
+                <p class="nav-label">ANNO</p>
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="sidebar-footer">
+                <p class="sidebar-footer-text">Ultimo aggiornamento:</p>
+                <p class="sidebar-footer-date" id="lastUpdate">—</p>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main-content">
+
+            <!-- HEADER -->
+            <header class="top-header">
+                <div class="header-left">
+                    <h1 id="dashboard-title">Dashboard Allenamenti</h1>
+                    <p class="header-subtitle" id="header-subtitle">Caricamento dati…</p>
+                </div>
+                <div class="header-right">
+                    <span id="sync-status" class="sync-badge" style="margin-right: 15px;">
+                        🔄 <span id="last-sync-text">Caricamento...</span>
+                    </span>
+                    <button id="btn-logout" class="btn-icon" title="Logout">👋</button>
+                    <div class="header-badge" id="race-badge" style="margin-left: 15px;">
+                        <span class="badge-icon">🎯</span>
+                        <span>Ironman 70.3</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ═══ HERO: Readiness Briefing ═══ -->
+            <section id="readiness-section" class="readiness-hero">
+                <div class="readiness-badge-container">
+                    <div id="readiness-badge" class="readiness-badge readiness-loading">
+                        <span class="readiness-emoji">⏳</span>
+                    </div>
+                    <div id="readiness-label" class="readiness-label">Caricamento...</div>
+                </div>
+                <div class="readiness-content">
+                    <h2 class="readiness-title">📋 Briefing di Oggi</h2>
+                    <div id="readiness-date" class="readiness-date"></div>
+                    <div id="readiness-analysis" class="readiness-analysis">
+                        <p class="placeholder-text">In attesa del briefing del coach AI...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ METRIC CARDS ═══ -->
+            <section class="metrics-grid">
+                <div class="metric-card" id="card-sleep" title="Ore di sonno della notte. Puntare a 7-8 ore favorisce il recupero corporeo e l'adattamento all'allenamento. Più alto è meglio.">
+                    <div class="metric-icon">💤</div>
+                    <div class="metric-info">
+                        <span class="metric-label">Sleep</span>
+                        <span id="metric-sleep-value" class="metric-value">—</span>
+                        <span id="metric-sleep-sub" class="metric-sub">ore</span>
+                    </div>
+                    <div id="metric-sleep-trend" class="metric-trend"></div>
+                </div>
+
+                <div class="metric-card" id="card-hrv" title="Heart Rate Variability (Variabilità della frequenza cardiaca) misurata in millisecondi (RMSSD). Riflette l'equilibrio del sistema nervoso autonomo. Più alto è meglio (indica maggior recupero e prontezza).">
+                    <div class="metric-icon">💓</div>
+                    <div class="metric-info">
+                        <span class="metric-label">HRV</span>
+                        <span id="metric-hrv-value" class="metric-value">—</span>
+                        <span id="metric-hrv-sub" class="metric-sub">ms RMSSD</span>
+                    </div>
+                    <div id="metric-hrv-trend" class="metric-trend"></div>
+                </div>
+
+                <div class="metric-card" id="card-battery" title="Garmin Body Battery (da 0 a 100) misurata al risveglio. È una stima dell'energia fisiologica a disposizione per affrontare la giornata. Più alto è meglio.">
+                    <div class="metric-icon">🔋</div>
+                    <div class="metric-info">
+                        <span class="metric-label">Body Battery</span>
+                        <span id="metric-battery-value" class="metric-value">—</span>
+                        <span id="metric-battery-sub" class="metric-sub">mattina</span>
+                    </div>
+                    <div id="metric-battery-trend" class="metric-trend"></div>
+                </div>
+
+                <div class="metric-card" id="card-rhr" title="Resting Heart Rate (Frequenza cardiaca a riposo). Un valore mediamente basso indica una buona efficienza cardiovascolare. Più basso è meglio (un improvviso aumento può segnalare affaticamento o l'arrivo di un malanno).">
+                    <div class="metric-icon">❤️</div>
+                    <div class="metric-info">
+                        <span class="metric-label">Resting HR</span>
+                        <span id="metric-rhr-value" class="metric-value">—</span>
+                        <span id="metric-rhr-sub" class="metric-sub">bpm</span>
+                    </div>
+                    <div id="metric-rhr-trend" class="metric-trend"></div>
+                </div>
+
+                <div class="metric-card" id="card-stress" title="Livello medio di stress fisiologico quotidiano (da 0 a 100). Misura la reazione del corpo a fattori esterni e interni (allenamento, lavoro, digestione). Più basso è meglio per ottimizzare il recupero.">
+                    <div class="metric-icon">😰</div>
+                    <div class="metric-info">
+                        <span class="metric-label">Stress</span>
+                        <span id="metric-stress-value" class="metric-value">—</span>
+                        <span id="metric-stress-sub" class="metric-sub">media</span>
+                    </div>
+                    <div id="metric-stress-trend" class="metric-trend"></div>
+                </div>
+
+                <div class="metric-card" id="card-load" title="Acute:Chronic Workload Ratio (ACWR). È il rapporto tra lo sforzo recente (ultimi 7gg) e la tua abitutidine (ultimi 28gg). Il valore ideale (zona di sicurezza) si attesta tra 0.8 e 1.3.">
+                    <div class="metric-icon">⚡</div>
+                    <div class="metric-info">
+                        <span class="metric-label">ACWR</span>
+                        <span id="metric-load-value" class="metric-value">—</span>
+                        <span id="metric-load-sub" class="metric-sub">ratio</span>
+                    </div>
+                    <div id="metric-load-trend" class="metric-trend"></div>
+                </div>
+            </section>
+
+            <!-- ═══ LOAD DETAILS ═══ -->
+            <section class="load-section" style="margin-top: 1.5rem; margin-bottom: 2rem;">
+                <h2 class="section-title"
+                    style="margin-bottom: 1rem; color: #f0f4ff; font-size: 1.1rem; font-weight: 600;">⚖️ Analisi del
+                    Carico (ACWR)</h2>
+                <div class="load-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem;">
+                    <div class="load-card" title="Rapporto tra il tuo carico attuale e quello storico. Lo 'Sweet Spot' è tra 0.8 e 1.3 per migliorare la performance riducendo il rischio infortuni."
+                        style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--glass-border); padding: 1rem; border-radius: 12px; text-align: center;">
+                        <div class="load-label"
+                            style="font-size: 0.75rem; color: var(--text-2); margin-bottom: 0.5rem; text-transform: uppercase;">
+                            ⚡ ACWR</div>
+                        <div id="load-acwr" class="load-value load-acwr-value"
+                            style="font-size: 1.5rem; font-weight: 700; color: #f0f4ff;">—</div>
+                        <div id="load-acwr-status" class="load-status" style="font-size: 0.75rem; margin-top: 0.5rem;">
+                            In attesa</div>
+                    </div>
+                    <div class="load-card" title="Carico Acuto: il volume totale di allenamento (es. km) accumulato negli ultimi 7 giorni esatti."
+                        style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--glass-border); padding: 1rem; border-radius: 12px; text-align: center;">
+                        <div class="load-label"
+                            style="font-size: 0.75rem; color: var(--text-2); margin-bottom: 0.5rem; text-transform: uppercase;">
+                            🏃 Acuto (7gg)</div>
+                        <div id="load-acute-km" class="load-value"
+                            style="font-size: 1.5rem; font-weight: 700; color: #f0f4ff;">—</div>
+                    </div>
+                    <div class="load-card" title="Carico Cronico: la media settimanale del volume di allenamento considerando gli ultimi 28 giorni. Rappresenta la tua 'abitudine' allo sforzo."
+                        style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--glass-border); padding: 1rem; border-radius: 12px; text-align: center;">
+                        <div class="load-label"
+                            style="font-size: 0.75rem; color: var(--text-2); margin-bottom: 0.5rem; text-transform: uppercase;">
+                            📅 Cronico (4s)</div>
+                        <div id="load-chronic-km" class="load-value"
+                            style="font-size: 1.5rem; font-weight: 700; color: #f0f4ff;">—</div>
+                    </div>
+                    <div class="load-card" title="Ramp Rate: incremento percentuale del carico (acuto) rispetto alla settimana precedente. La regola d'oro è non superare mai il +10/15% a settimana. Più è stabile o controllato, meglio è."
+                        style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--glass-border); padding: 1rem; border-radius: 12px; text-align: center;">
+                        <div class="load-label"
+                            style="font-size: 0.75rem; color: var(--text-2); margin-bottom: 0.5rem; text-transform: uppercase;">
+                            📈 Ramp Rate</div>
+                        <div id="load-ramp" class="load-value"
+                            style="font-size: 1.5rem; font-weight: 700; color: #f0f4ff;">—</div>
+                    </div>
+                    <div class="load-card" title="Polarizzazione: percentuale del tempo speso a bassa intensità (Z1-Z2). Ideale attorno all'80% (modello 80/20). Avvicinarsi all'80% è meglio."
+                        style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--glass-border); padding: 1rem; border-radius: 12px; text-align: center;">
+                        <div class="load-label"
+                            style="font-size: 0.75rem; color: var(--text-2); margin-bottom: 0.5rem; text-transform: uppercase;">
+                            🟢 Easy %</div>
+                        <div id="load-easy" class="load-value"
+                            style="font-size: 1.5rem; font-weight: 700; color: #f0f4ff;">—</div>
+                    </div>
+                    <div class="load-card" title="Polarizzazione: percentuale del tempo speso ad alta intensità (Sopra Z2). Ideale attorno al 20%. Attenzione a non esagerare con l'intensità."
+                        style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--glass-border); padding: 1rem; border-radius: 12px; text-align: center;">
+                        <div class="load-label"
+                            style="font-size: 0.75rem; color: var(--text-2); margin-bottom: 0.5rem; text-transform: uppercase;">
+                            🔴 Hard %</div>
+                        <div id="load-hard" class="load-value"
+                            style="font-size: 1.5rem; font-weight: 700; color: #f0f4ff;">—</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- KPI CARDS -->
+            <section class="kpi-grid" id="kpiGrid">
+                <div class="kpi-card" id="kpi-activities">
+                    <div class="kpi-icon">📊</div>
+                    <div class="kpi-body">
+                        <p class="kpi-label">Attività Totali</p>
+                        <p class="kpi-value" id="kpiActivities">—</p>
+                    </div>
+                </div>
+                <div class="kpi-card" id="kpi-km">
+                    <div class="kpi-icon">📏</div>
+                    <div class="kpi-body">
+                        <p class="kpi-label">Km Totali</p>
+                        <p class="kpi-value" id="kpiKm">—</p>
+                    </div>
+                </div>
+                <div class="kpi-card" id="kpi-hours">
+                    <div class="kpi-icon">⏱️</div>
+                    <div class="kpi-body">
+                        <p class="kpi-label">Ore Totali</p>
+                        <p class="kpi-value" id="kpiHours">—</p>
+                    </div>
+                </div>
+                <div class="kpi-card" id="kpi-hr">
+                    <div class="kpi-icon">❤️</div>
+                    <div class="kpi-body">
+                        <p class="kpi-label">FC Media</p>
+                        <p class="kpi-value" id="kpiHr">—</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CHART 1: Volume Cumulativo YoY -->
+            <section class="chart-card" id="card-volume">
+                <div class="chart-card-header">
+                    <div>
+                        <h2>🏁 Volume Cumulativo Anno su Anno</h2>
+                        <p class="chart-subtitle">Km accumulati dall'inizio della stagione — confronto per anno</p>
+                    </div>
+                    <div class="chart-toggle-group" id="volumeUnitToggle">
+                        <button class="toggle-btn active" data-unit="km">Km</button>
+                        <button class="toggle-btn" data-unit="h">Ore</button>
+                    </div>
+                </div>
+                <div class="chart-area">
+                    <canvas id="chartYoY"></canvas>
+                </div>
+            </section>
+
+            <!-- CHART 2: Efficienza Aerobica -->
+            <section class="chart-card" id="card-efficiency">
+                <div class="chart-card-header">
+                    <div>
+                        <h2>❤️ Efficienza Aerobica</h2>
+                        <p class="chart-subtitle" id="efficiencySubtitle">Passo (sec/km) vs FC Media — ogni punto è
+                            un'attività</p>
+                    </div>
+                </div>
+                <div class="chart-area">
+                    <canvas id="chartEfficiency"></canvas>
+                </div>
+            </section>
+
+            <!-- CHART 3: Heatmap Costanza -->
+            <section class="chart-card" id="card-heatmap">
+                <div class="chart-card-header">
+                    <div>
+                        <h2>🔥 Heatmap Costanza</h2>
+                        <p class="chart-subtitle">Attività giornaliere — colori per durata (minuti)</p>
+                    </div>
+                    <div class="heatmap-legend">
+                        <span class="legend-label">Meno</span>
+                        <span class="legend-dot" style="background:var(--heat-0)"></span>
+                        <span class="legend-dot" style="background:var(--heat-1)"></span>
+                        <span class="legend-dot" style="background:var(--heat-2)"></span>
+                        <span class="legend-dot" style="background:var(--heat-3)"></span>
+                        <span class="legend-dot" style="background:var(--heat-4)"></span>
+                        <span class="legend-label">Più</span>
+                    </div>
+                </div>
+                <div class="heatmap-wrapper" id="heatmapWrapper">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- CHART 4: Volume Settimanale per Sport -->
+            <section class="chart-card" id="card-weekly">
+                <div class="chart-card-header">
+                    <div>
+                        <h2>📅 Volume Settimanale per Sport</h2>
+                        <p class="chart-subtitle">Km per settimana, suddivisi per disciplina</p>
+                    </div>
+                </div>
+                <div class="chart-area">
+                    <canvas id="chartWeekly"></canvas>
+                </div>
+            </section>
+
+            <!-- ═══ ACTIVITIES & BRIEFINGS ═══ -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem;">
+                <section class="activities-section"
+                    style="background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 1.5rem;">
+                    <h2 class="section-title"
+                        style="margin-bottom: 1rem; color: #f0f4ff; font-size: 1.1rem; font-weight: 600;">🏅 Attività
+                        Recenti</h2>
+                    <div id="activities-list" class="activities-list"
+                        style="display: flex; flex-direction: column; gap: 0.8rem;">
+                        <div class="placeholder-text" style="color: var(--text-3); font-size: 0.85rem;">Nessuna attività
+                            ancora sincronizzata</div>
+                    </div>
+                </section>
+
+                <section class="history-section"
+                    style="background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 1.5rem;">
+                    <h2 class="section-title"
+                        style="margin-bottom: 1rem; color: #f0f4ff; font-size: 1.1rem; font-weight: 600;">📋 Storico
+                        Briefing</h2>
+                    <div id="briefing-history" class="briefing-history"
+                        style="display: flex; flex-direction: column; gap: 0.8rem;">
+                        <div class="placeholder-text" style="color: var(--text-3); font-size: 0.85rem;">Nessun briefing
+                            precedente</div>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+
+    </div> <!-- END APP CONTAINER -->
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Caricamento dati…</p>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>

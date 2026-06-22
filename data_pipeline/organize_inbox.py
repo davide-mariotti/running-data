@@ -158,10 +158,11 @@ def main():
     )
     args = parser.parse_args()
 
-    base_dir = Path(__file__).parent
+    root_dir = Path(__file__).parent.parent
+    data_dir = root_dir / "data"
     inbox    = Path(args.inbox)
     if not inbox.is_absolute():
-        inbox = base_dir / inbox
+        inbox = data_dir / inbox.name
 
     print("\n" + "="*60)
     print("ORGANIZZAZIONE ATTIVITÀ GARMIN → ANNO/Wxx/")
@@ -201,9 +202,9 @@ def main():
             continue
 
         # Controlla se già presente
-        existing = check_already_exists(aid, base_dir)
+        existing = check_already_exists(aid, data_dir)
         if existing:
-            print(f"  [SKIP] activity_{aid}: già presente in {existing.relative_to(base_dir)}")
+            print(f"  [SKIP] activity_{aid}: già presente in {existing.relative_to(data_dir)}")
             skip += 1
             continue
 
@@ -215,7 +216,7 @@ def main():
             continue
 
         year, week = calendar_week_folder(date_str)
-        dest_dir   = base_dir / year / week
+        dest_dir   = data_dir / year / week
 
         if args.dry_run:
             print(f"  [DRY ] activity_{aid}.csv/.gpx  →  {year}/{week}/  ({date_str})")

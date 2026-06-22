@@ -168,14 +168,16 @@ def parse_gpx_meta(gpx_path: Path) -> dict:
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 def main():
-    base_dir = Path(__file__).parent
+    root_dir = Path(__file__).parent.parent
+    data_dir = root_dir / "data"
+    frontend_dir = root_dir / "frontend"
 
     print("\n" + "="*50)
     print("INIZIO CONVERSIONE ATTIVITÀ (SETTIMANE UNIFICATE, MULTI-ANNO)")
     print("="*50)
 
     # Trova tutte le cartelle che hanno il nome di un anno a 4 cifre (es. 2026)
-    year_dirs = [d for d in base_dir.iterdir() if d.is_dir() and re.match(r"^\d{4}$", d.name)]
+    year_dirs = [d for d in data_dir.iterdir() if d.is_dir() and re.match(r"^\d{4}$", d.name)]
     
     if not year_dirs:
         print("[ERRORE] Nessuna cartella anno trovata (es. 2026, 2027).")
@@ -192,7 +194,7 @@ def main():
 
     for year_dir in sorted(year_dirs):
         year = year_dir.name
-        out_base = base_dir / f"output{year}"
+        out_base = data_dir / f"output{year}"
         out_base.mkdir(exist_ok=True)
         
         print(f"\n--- Elaborazione Anno: {year} ---")
@@ -288,7 +290,7 @@ def main():
                     dashboard_index.append(index_entry)
 
     # Salva l'indice globale
-    index_file = base_dir / "dashboard_index.json"
+    index_file = frontend_dir / "dashboard_index.json"
     with open(index_file, "w", encoding="utf-8") as f:
         json.dump(dashboard_index, f, ensure_ascii=False, indent=2)
 

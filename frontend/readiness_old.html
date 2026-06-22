@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard autonoma per il running coach AI - Analisi readiness, biometria e carico di allenamento da Garmin Connect">
+    <title>🏃 Agentic Running Coach</title>
+
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Firebase SDK (compat mode per semplicità) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- ═══ LOGIN SCREEN ═══ -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-card">
+            <div class="login-logo">🏃</div>
+            <h1 class="login-title">Agentic Running Coach</h1>
+            <p class="login-subtitle">Il tuo coach AI autonomo</p>
+            <form id="login-form" class="login-form">
+                <div class="input-group">
+                    <label for="login-email">📧 Email</label>
+                    <input type="email" id="login-email" placeholder="la-tua@email.com" required>
+                </div>
+                <div class="input-group">
+                    <label for="login-password">🔒 Password</label>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn-login" id="btn-login">
+                    <span class="btn-text">Entra</span>
+                    <span class="btn-loader" style="display:none">⏳</span>
+                </button>
+                <p id="login-error" class="login-error"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div id="dashboard" class="dashboard" style="display:none">
+
+        <!-- ── Header ── -->
+        <header class="header">
+            <div class="header-left">
+                <span class="header-logo">🏃</span>
+                <h1 class="header-title">Agentic Running Coach</h1>
+            </div>
+            <div class="header-right">
+                <span id="sync-status" class="sync-badge">
+                    🔄 <span id="last-sync-text">Caricamento...</span>
+                </span>
+                <button id="btn-logout" class="btn-icon" title="Logout">👋</button>
+            </div>
+        </header>
+
+        <!-- ── Main Content ── -->
+        <main class="main-content">
+
+            <!-- ═══ HERO: Readiness Briefing ═══ -->
+            <section id="readiness-section" class="readiness-hero">
+                <div class="readiness-badge-container">
+                    <div id="readiness-badge" class="readiness-badge readiness-loading">
+                        <span class="readiness-emoji">⏳</span>
+                    </div>
+                    <div id="readiness-label" class="readiness-label">Caricamento...</div>
+                </div>
+                <div class="readiness-content">
+                    <h2 class="readiness-title">📋 Briefing di Oggi</h2>
+                    <div id="readiness-date" class="readiness-date"></div>
+                    <div id="readiness-analysis" class="readiness-analysis">
+                        <p class="placeholder-text">In attesa del briefing del coach AI...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ METRIC CARDS ═══ -->
+            <section class="metrics-grid">
+                <div class="metric-card" id="card-sleep">
+                    <div class="metric-icon">💤</div>
+                    <div class="metric-info">
+                        <span class="metric-label">Sleep</span>
+                        <span id="metric-sleep-value" class="metric-value">—</span>
+                        <span id="metric-sleep-sub" class="metric-sub">ore</span>
+                    </div>
+                    <div id="metric-sleep-trend" class="metric-trend"></div>
+                </div>
+
+                <div class="metric-card" id="card-hrv">
+                    <div class="metric-icon">💓</div>
+                    <div class="metric-info">
+                        <span class="metric-label">HRV</span>
+                        <span id="metric-hrv-value" class="metric-value">—</span>
+                        <span id="metric-hrv-sub" class="metric-sub">ms RMSSD</span>
+                    </div>
+                    <div id="metric-hrv-trend" class="metric-trend"></div>
+                </div>
+
+                <div class="metric-card" id="card-battery">
+                    <div class="metric-icon">🔋</div>
+                    <div class="metric-info">
+                        <span class="metric-label">Body Battery</span>
+                        <span id="metric-battery-value" class="metric-value">—</span>
+                        <span id="metric-battery-sub" class="metric-sub">mattina</span>
+                    </div>
+                    <div id="metric-battery-trend" class="metric-trend"></div>
+                </div>
+
+                <div class="metric-card" id="card-rhr">
+                    <div class="metric-icon">❤️</div>
+                    <div class="metric-info">
+                        <span class="metric-label">Resting HR</span>
+                        <span id="metric-rhr-value" class="metric-value">—</span>
+                        <span id="metric-rhr-sub" class="metric-sub">bpm</span>
+                    </div>
+                    <div id="metric-rhr-trend" class="metric-trend"></div>
+                </div>
+
+                <div class="metric-card" id="card-stress">
+                    <div class="metric-icon">😰</div>
+                    <div class="metric-info">
+                        <span class="metric-label">Stress</span>
+                        <span id="metric-stress-value" class="metric-value">—</span>
+                        <span id="metric-stress-sub" class="metric-sub">media</span>
+                    </div>
+                    <div id="metric-stress-trend" class="metric-trend"></div>
+                </div>
+
+                <div class="metric-card" id="card-load">
+                    <div class="metric-icon">⚡</div>
+                    <div class="metric-info">
+                        <span class="metric-label">ACWR</span>
+                        <span id="metric-load-value" class="metric-value">—</span>
+                        <span id="metric-load-sub" class="metric-sub">ratio</span>
+                    </div>
+                    <div id="metric-load-trend" class="metric-trend"></div>
+                </div>
+            </section>
+
+            <!-- ═══ CHARTS ═══ -->
+            <section class="charts-grid">
+                <div class="chart-card">
+                    <h3 class="chart-title">💓 HRV — Ultimi 14 giorni</h3>
+                    <div class="chart-container">
+                        <canvas id="chart-hrv"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title">💤 Sleep Score — Ultimi 14 giorni</h3>
+                    <div class="chart-container">
+                        <canvas id="chart-sleep"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title">🔋 Body Battery — Ultimi 14 giorni</h3>
+                    <div class="chart-container">
+                        <canvas id="chart-battery"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title">❤️ Resting HR — Ultimi 14 giorni</h3>
+                    <div class="chart-container">
+                        <canvas id="chart-rhr"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ LOAD SECTION ═══ -->
+            <section class="load-section">
+                <h2 class="section-title">⚡ Carico di Allenamento</h2>
+                <div class="load-grid">
+                    <div class="load-card">
+                        <div class="load-label">📏 Km Settimanali (7gg)</div>
+                        <div id="load-acute-km" class="load-value">—</div>
+                    </div>
+                    <div class="load-card">
+                        <div class="load-label">📊 Media Cronica (28gg)</div>
+                        <div id="load-chronic-km" class="load-value">—</div>
+                    </div>
+                    <div class="load-card acwr-card">
+                        <div class="load-label">⚖️ ACWR</div>
+                        <div id="load-acwr" class="load-value load-acwr-value">—</div>
+                        <div id="load-acwr-status" class="load-status"></div>
+                    </div>
+                    <div class="load-card">
+                        <div class="load-label">📈 Ramp Rate</div>
+                        <div id="load-ramp" class="load-value">—</div>
+                    </div>
+                    <div class="load-card">
+                        <div class="load-label">🟢 Easy %</div>
+                        <div id="load-easy" class="load-value">—</div>
+                    </div>
+                    <div class="load-card">
+                        <div class="load-label">🔴 Hard %</div>
+                        <div id="load-hard" class="load-value">—</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ ACTIVITIES ═══ -->
+            <section class="activities-section">
+                <h2 class="section-title">🏅 Attività Recenti</h2>
+                <div id="activities-list" class="activities-list">
+                    <div class="placeholder-text">Nessuna attività ancora sincronizzata</div>
+                </div>
+            </section>
+
+            <!-- ═══ BRIEFING HISTORY ═══ -->
+            <section class="history-section">
+                <h2 class="section-title">📋 Storico Briefing</h2>
+                <div id="briefing-history" class="briefing-history">
+                    <div class="placeholder-text">Nessun briefing precedente</div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- ── Footer ── -->
+        <footer class="footer">
+            <p>🏃 Agentic Running Coach · Powered by Garmin Connect + Gemini AI · Built with 🔥 Firebase</p>
+        </footer>
+    </div>
+
+    <!-- App Scripts -->
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

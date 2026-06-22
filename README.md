@@ -1,78 +1,127 @@
-# 🏃‍♂️ Triathlon & Running Data Dashboard
+# 🏃 Agentic Running Coach
 
-Benvenuto nel progetto **Running Data**! Questa repository è nata per aiutarti a raccogliere, elaborare e visualizzare i dati dei tuoi allenamenti (Corsa, Bici, Nuoto) esportati da Garmin Connect, trasformandoli in una dashboard interattiva multi-anno e multi-sport, ideale per la preparazione a eventi come un Ironman 70.3.
+Un coach per l'endurance completamente autonomo basato su AI. Questo progetto estrae ogni giorno i dati biometrici e di carico da Garmin Connect, li storicizza su Firestore e utilizza un agente Gemini AI per valutare la prontezza fisica. L'AI percepisce la fatica, analizza i trend e ti dice come stai — ogni mattina, senza chiederlo.
 
-## ✨ Funzionalità
+## 🏗️ Architettura
 
-- **Smistamento Automatico (`organize_inbox.py`)**: Uno script dedicato per organizzare in automatico i file sfusi provenienti da Garmin all'interno di cartelle strutturate per anno e settimana (es. `2026/W01/`), leggendo direttamente la data dai file GPX.
-- **Conversione Unificata (`convert_all.py`)**: Un unico script Python per trasformare i file Garmin (CSV e GPX) in JSON. Riconosce lo sport e standardizza metriche molto diverse (come la potenza in bici, o lo SWOLF nel nuoto) sotto un unico formato.
-- **Cache Intelligente**: Lo script salta l'elaborazione dei file già convertiti per velocizzare le esecuzioni successive.
-- **Dashboard Multi-Anno**: Un'interfaccia dark mode moderna (`dashboard.html`) che legge il `dashboard_index.json` per visualizzare grafici dinamici, curve di volume Anno su Anno, mappe di calore stile GitHub per la costanza, ed efficienza aerobica per ogni sport.
-
----
-
-## 🛠️ Requisiti
-
-- **Python 3.8+**
-- Un web server locale (per visualizzare la dashboard, es: `python -m http.server 8765`)
-- Dati esportati da Garmin Connect (CSV "Lap" e file "GPX").
-
----
-
-## 📂 Struttura della Repository
-
-```text
-running-data/
-├── dashboard.html/css/js # La dashboard interattiva
-├── dashboard_index.json  # Indice globale leggero usato dalla dashboard
-├── inbox/                # Cartella di "atterraggio" per i nuovi file scaricati
-├── 2026/                 # Cartelle dati grezzi organizzati per anno e settimana
-│   └── W01/              
-│       ├── activity_123.csv
-│       └── activity_123.gpx
-├── output2026/           # JSON convertiti pronti per l'uso
-│   └── W01/              
-│       ├── W01_26-04-01_run_123.json
-│       ├── W01_26-04-02_bike_456.json
-│       └── W01_26-04-04_swim_789.json
-├── organize_inbox.py     # Script che smista i file da inbox/ a ANNO/Wxx/
-└── convert_all.py        # Script che processa i dati e aggiorna l'indice
+```
+Garmin Connect → [Cloud Function 🌙 03:00] → Firestore → [Cloud Function ☀️ 06:30] → Gemini AI → Dashboard
 ```
 
----
+- **🌙 Nightly Sync (03:00)**: Estrae sleep, HRV, Body Battery, stress, resting HR e attività
+- **☀️ Morning Coach (06:30)**: Analizza 14 giorni di dati e genera il briefing di readiness
+- **📊 Dashboard**: Web app moderna per visualizzare tutto
 
-## 🚀 Guida all'Uso
+## 📦 Stack Tecnologico
 
-### 1. Esportazione Dati
-1. Vai su **Garmin Connect** web.
-2. Apri l'attività e usa l'icona dell'ingranaggio (Impostazioni).
-3. Seleziona **Esporta in GPX** e **Esporta Lap in CSV**.
-4. Inserisci la coppia di file scaricati direttamente nella cartella `inbox/`.
+| Componente | Tecnologia |
+|-----------|-----------|
+| **Database** | Firebase Firestore |
+| **Backend** | Firebase Cloud Functions (Python 3.12) |
+| **AI** | Google Gemini 2.5 Flash |
+| **Data Source** | Garmin Connect via `python-garminconnect` |
+| **Frontend** | Vanilla HTML/CSS/JS + Chart.js |
+| **Hosting** | Firebase Hosting |
+| **Auth** | Firebase Authentication |
 
-### 2. Organizzazione File (Automatico)
-Dalla cartella root del progetto, esegui:
+## 🚀 Quick Start
+
+### Prerequisiti
+
+- Python 3.11+
+- Node.js 18+
+- Account Firebase con piano Blaze
+- Account Garmin Connect
+- API Key Gemini ([aistudio.google.com](https://aistudio.google.com/apikey))
+
+### 1. Setup Firebase
+
 ```bash
-python organize_inbox.py
+npm install -g firebase-tools
+firebase login
+firebase init  # Seleziona: Firestore, Functions (Python), Hosting
 ```
-Lo script leggerà la data dai file GPX e li sposterà magicamente all'interno della cartella dell'anno e della settimana di calendario corretta (la W01 inizia sempre dal 1° Gennaio).
 
-### 3. Elaborazione Dati e Indice
-Esegui la conversione:
+### 2. Configura i segreti
+
 ```bash
-python convert_all.py
+firebase functions:secrets:set GARMIN_EMAIL
+firebase functions:secrets:set GARMIN_PASSWORD
+firebase functions:secrets:set GEMINI_API_KEY
 ```
-I file JSON dettagliati verranno creati in `output<ANNO>/<Wxx>/`. Allo stesso tempo il file `dashboard_index.json` verrà aggiornato con tutte le ultime attività.
 
-### 4. Visualizza la Dashboard
-Apri un terminale e avvia il server locale:
+### 3. Setup iniziale Garmin
+
 ```bash
-python -m http.server 8765
+cd scripts
+pip install garminconnect firebase-admin
+python setup_garmin.py
 ```
-Apri il browser su [http://localhost:8765/dashboard.html](http://localhost:8765/dashboard.html) e goditi i tuoi grafici aggiornati!
 
----
+### 4. Configura la Dashboard
 
-## 💡 Note Tecniche
+1. Vai su Firebase Console → ⚙️ → Le tue app → Aggiungi app web
+2. Copia il `firebaseConfig` in `hosting/js/app.js`
+3. Attiva Authentication → Email/Password
+4. Crea un utente nella console
 
-- **Nomenclatura Output**: I file generati seguono la logica `Wxx_YY-MM-DD_sport_ID.json`. In questo modo, all'interno di ogni cartella settimanale, i file si dispongono sempre in perfetto ordine cronologico dal Lunedì alla Domenica.
-- **Mapping Metriche**: `convert_all.py` normalizza le intestazioni CSV Garmin in chiavi `snake_case` e unifica chiavi discordanti tra gli sport per mantenere il `dashboard_index.json` il più flessibile possibile.
+### 5. Deploy
+
+```bash
+firebase deploy
+```
+
+## 📁 Struttura Progetto
+
+```
+├── functions/
+│   ├── main.py              # Entry point Cloud Functions
+│   ├── garmin_sync.py        # Pipeline dati Garmin Connect
+│   ├── coach_brain.py        # Agente AI readiness
+│   ├── prompts.py            # System prompt + templates
+│   ├── compute_load.py       # Calcolo ACWR e carico
+│   └── requirements.txt
+├── hosting/
+│   ├── index.html            # Dashboard SPA
+│   ├── css/style.css         # Design system (dark mode)
+│   └── js/
+│       ├── app.js            # Logica Firebase + rendering
+│       └── charts.js         # Grafici biometrici
+├── scripts/
+│   └── setup_garmin.py       # Setup iniziale interattivo
+├── firebase.json
+├── firestore.rules
+└── firestore.indexes.json
+```
+
+## 🤖 Come funziona il Coach
+
+Ogni mattina l'agente Gemini riceve una tabella con 14 giorni di dati biometrici e restituisce:
+
+| Sezione | Cosa dice |
+|---------|----------|
+| 🎯 **READINESS** | GREEN / AMBER / RED con i numeri chiave |
+| 📈 **TREND** | Direzione di HRV, sleep, Body Battery, resting HR |
+| ⚡ **CARICO** | ACWR, km, ramp rate |
+| 🔍 **SEGNALI** | Pattern preoccupanti nei dati |
+| 💡 **CONSIGLIO** | Raccomandazione concreta |
+| 🚩 **FLAG** | Allarmi urgenti |
+
+## 📊 Dati Estratti da Garmin
+
+| Metrica | Fonte Garmin | Frequenza |
+|---------|-------------|-----------|
+| 💤 Sleep | `get_sleep_data()` | Giornaliera |
+| 💓 HRV | `get_hrv_data()` | Giornaliera |
+| 🔋 Body Battery | `get_body_battery()` | Giornaliera |
+| 😰 Stress | `get_stress_data()` | Giornaliera |
+| ❤️ Resting HR | `get_rhr_day()` | Giornaliera |
+| 🏃 Attività | `get_activities_by_date()` | Giornaliera |
+
+## 💰 Costi
+
+**$0/mese** con le quote gratuite di Firebase Blaze e Gemini API.
+
+## 📄 Licenza
+
+Progetto personale ispirato alla guida [Running on AI — The Iceberg Guide](https://runningon.ai).

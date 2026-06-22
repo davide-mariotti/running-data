@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diario dell'Allenatore AI — Davide Mariotti</title>
+    <title>🏃‍♂️ AI Coach | Diario</title>
     <meta name="description" content="Diario di allenamento triathlon generato dall'AI Coach. Leggi i report settimanali sulle performance e i progressi.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏃‍♂️</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="diary.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/diary.css">
 </head>
 <body>
 
@@ -22,7 +23,7 @@
 
         <nav class="sidebar-nav">
             <p class="nav-label">NAVIGAZIONE</p>
-            <a href="dashboard.html" class="nav-btn" style="text-decoration: none;">
+            <a href="index.html" class="nav-btn" style="text-decoration: none;">
                 <span class="nav-icon">📊</span> Dashboard
             </a>
             <a href="diary.html" class="nav-btn active" style="text-decoration: none;">
@@ -36,24 +37,22 @@
         <div class="sidebar-week-nav">
             <p class="nav-label">SETTIMANA</p>
 
-            <div class="sidebar-selects-row">
-                <div class="sidebar-select-group">
-                    <label class="sidebar-select-label">Anno</label>
-                    <select id="yearSelect" class="sidebar-select"></select>
-                </div>
-                <div class="sidebar-select-group" style="flex:2">
-                    <label class="sidebar-select-label">Settimana</label>
-                    <select id="weekSelect" class="sidebar-select"></select>
-                </div>
+            <div class="sidebar-select-group">
+                <label class="sidebar-select-label">Anno</label>
+                <select id="yearSelect" class="sidebar-select"></select>
+            </div>
+            <div class="sidebar-select-group">
+                <label class="sidebar-select-label">Settimana</label>
+                <select id="weekSelect" class="sidebar-select"></select>
             </div>
 
             <div class="sidebar-nav-arrows">
-                <button id="prevWeekBtn" class="arrow-btn" disabled>‹ Prec</button>
+                <button id="prevWeekBtn" class="arrow-btn" disabled>‹</button>
                 <div id="weekIndicator" class="week-indicator">
                     <span id="weekLabel">—</span>
                     <span id="weekCounter" class="week-counter"></span>
                 </div>
-                <button id="nextWeekBtn" class="arrow-btn" disabled>Succ ›</button>
+                <button id="nextWeekBtn" class="arrow-btn" disabled>›</button>
             </div>
         </div>
 
@@ -62,9 +61,9 @@
         <!-- Expand/Collapse all -->
         <div class="sidebar-week-nav" style="gap:0.4rem">
             <p class="nav-label">SEZIONI</p>
-            <div class="sidebar-nav-arrows">
-                <button id="expandAllBtn" class="arrow-btn">↕ Espandi tutto</button>
-                <button id="collapseAllBtn" class="arrow-btn">↕ Comprimi</button>
+            <div class="sidebar-nav-actions">
+                <button id="expandAllBtn" class="action-btn">↕ Espandi tutto</button>
+                <button id="collapseAllBtn" class="action-btn">↕ Comprimi</button>
             </div>
         </div>
 

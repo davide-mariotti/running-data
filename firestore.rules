@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Dati atleta: per il progetto single-user permettiamo a chiunque sia loggato di leggere
+    match /athletes/{userId}/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if false; // Solo Cloud Functions (Admin SDK bypassa le rules)
+    }
+
+    // Configurazione sistema (token Garmin etc): solo Cloud Functions
+    match /system/{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

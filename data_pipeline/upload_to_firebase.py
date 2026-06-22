@@ -112,8 +112,8 @@ def main():
 
     # Genera il briefing reale tramite Gemini se l'API key è disponibile
     env_path = root_dir / ".env"
-    api_key = None
-    if env_path.exists():
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key and env_path.exists():
         with open(env_path, "r", encoding="utf-8") as f:
             for line in f:
                 if line.startswith("GEMINI_API_KEY="):

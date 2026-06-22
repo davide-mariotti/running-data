@@ -51,10 +51,9 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
         # Aggiungiamo i file aggiornati
-        git add frontend/dashboard_index.json
-        git add frontend/diary/
-        git add data/
-        git add inbox/
+        git add frontend/dashboard_index.json || true
+        git add frontend/diary/ || true
+        git add data/ || true
         
         # Facciamo il commit solo se ci sono modifiche
         git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Auto-sync Garmin Data" && git push)

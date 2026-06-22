@@ -1,0 +1,5 @@
+garminconnect==0.2.14
+firebase-admin
+google-genai
+pandas
+python-dotenv

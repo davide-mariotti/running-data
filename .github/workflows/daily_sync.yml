@@ -1,0 +1,60 @@
+name: Daily Garmin Sync
+
+on:
+  schedule:
+    - cron: '30 7 * * *' # 07:30 UTC = 09:30 in Italy (CET/CEST)
+  workflow_dispatch: # Permette l'esecuzione manuale dal sito GitHub
+
+jobs:
+  sync_garmin:
+    runs-on: ubuntu-latest
+    
+    # Diamo al token di GitHub i permessi di scrittura sul repository
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install garminconnect firebase-admin google-genai pandas
+
+    - name: Create Firebase Service Account file
+      run: |
+        echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > service-account.json
+
+    - name: Run Auto-Fetch Script
+      env:
+        GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+        GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        GOOGLE_APPLICATION_CREDENTIALS: service-account.json
+      run: |
+        python data_pipeline/auto_fetch.py
+
+    - name: Commit and Push changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # Aggiungiamo i file aggiornati
+        git add frontend/dashboard_index.json
+        git add frontend/diary/
+        git add data/
+        git add inbox/
+        
+        # Facciamo il commit solo se ci sono modifiche
+        git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Auto-sync Garmin Data" && git push)

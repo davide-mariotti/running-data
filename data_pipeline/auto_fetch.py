@@ -28,28 +28,41 @@ def load_existing_activity_ids(index_path):
         return set()
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Auto Fetch")
+    parser.add_argument("--user_id", default="athlete_main")
+    parser.add_argument("--email", default=None)
+    parser.add_argument("--password", default=None)
+    parser.add_argument("--work_dir", default=None, help="Directory di lavoro base")
+    args = parser.parse_args()
+
     print("=" * 60)
-    print("🏃 AGENTIC RUNNING COACH — Auto Fetch (GitHub Actions)")
+    print(f"🏃 AGENTIC RUNNING COACH — Auto Fetch ({args.user_id})")
     print("=" * 60)
 
     # 1. Init Firebase
     sa_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "service-account.json")
     if not os.path.exists(sa_path):
-        logger.error(f"❌ File service-account.json non trovato in {sa_path}")
-        sys.exit(1)
-
-    cred = credentials.Certificate(sa_path)
-    firebase_admin.initialize_app(cred)
+        # Fallback al percorso assoluto
+        sa_path = os.path.join(os.path.dirname(__file__), '..', 'service-account.json')
+    
+    if os.path.exists(sa_path):
+        try:
+            cred = credentials.Certificate(sa_path)
+            firebase_admin.initialize_app(cred)
+            logger.info("✅ Firebase inizializzato")
+        except ValueError:
+            pass # Già inizializzato
     db = firestore.client()
-    logger.info("✅ Firebase inizializzato")
 
-    email = os.environ.get("GARMIN_EMAIL")
-    password = os.environ.get("GARMIN_PASSWORD")
+    email = args.email or os.environ.get("GARMIN_EMAIL")
+    password = args.password or os.environ.get("GARMIN_PASSWORD")
     if not email or not password:
-        logger.error("❌ Credenziali Garmin non fornite via ENV (GARMIN_EMAIL, GARMIN_PASSWORD)")
+        logger.error("❌ Credenziali Garmin non fornite")
         sys.exit(1)
 
-    user_id = os.environ.get("ATHLETE_USER_ID", "athlete_main")
+    user_id = args.user_id
+    work_dir = args.work_dir
 
     # 2. Setup GarminSync
     sync = GarminSync(email, password, db, user_id)
@@ -69,11 +82,23 @@ def main():
 
     # 4. Scarica nuove attività in formato ZIP/FIT o JSON
     logger.info("📥 Controllo nuove attività...")
-    index_path = os.path.join(os.path.dirname(__file__), '..', 'frontend', 'dashboard_index.json')
-    existing_ids = load_existing_activity_ids(index_path)
     
-    inbox_dir = os.path.join(os.path.dirname(__file__), '..', 'data', 'inbox')
+    # Imposta i path in base al work_dir
+    if work_dir:
+        base_dir = Path(work_dir)
+        index_path = base_dir / "dashboard_index.json"
+        inbox_dir = base_dir / "inbox"
+        data_dir = base_dir / "data"
+    else:
+        base_dir = Path(__file__).parent.parent
+        index_path = base_dir / "frontend" / "dashboard_index.json"
+        inbox_dir = base_dir / "data" / "inbox"
+        data_dir = base_dir / "data"
+        
     os.makedirs(inbox_dir, exist_ok=True)
+    os.makedirs(data_dir, exist_ok=True)
+    
+    existing_ids = load_existing_activity_ids(str(index_path))
     
     activities_fetched = 0
     # Cerca attività negli ultimi 5 giorni
@@ -91,23 +116,19 @@ def main():
                 if act_id not in existing_ids:
                     logger.info(f"   ⬇️ Scarico nuova attività: {act_id} ({act.get('activityName', '')})")
                     try:
-                        # Scarica CSV e GPX per essere compatibile con organize_inbox
                         from garminconnect import Garmin
-                        
-                        # Download CSV
                         csv_data = sync.client.download_activity(act_id, dl_fmt=Garmin.ActivityDownloadFormat.CSV)
                         csv_path = os.path.join(inbox_dir, f"activity_{act_id}.csv")
                         with open(csv_path, "wb") as f:
                             f.write(csv_data)
                             
-                        # Download GPX (non tutte le attività lo hanno, ma proviamo)
                         try:
                             gpx_data = sync.client.download_activity(act_id, dl_fmt=Garmin.ActivityDownloadFormat.GPX)
                             gpx_path = os.path.join(inbox_dir, f"activity_{act_id}.gpx")
                             with open(gpx_path, "wb") as f:
                                 f.write(gpx_data)
                         except Exception as e:
-                            logger.warning(f"      ⚠️ Impossibile scaricare GPX per {act_id} (potrebbe essere indoor): {e}")
+                            logger.warning(f"      ⚠️ Impossibile scaricare GPX per {act_id}: {e}")
 
                         activities_fetched += 1
                         logger.info(f"      ✅ Salvati file CSV/GPX per {act_id} in inbox")
@@ -116,40 +137,39 @@ def main():
     except Exception as e:
         logger.error(f"❌ Errore recupero lista attività: {e}")
 
-    # 5. Esegui la pipeline locale solo se ci sono nuovi file (o per generare index aggiornato)
+    # 5. Esegui la pipeline
     logger.info("⚙️ Avvio pipeline di conversione dati...")
     
-    scripts_dir = os.path.dirname(__file__)
+    import subprocess
+    def run_script(script_name, args_list):
+        script_path = os.path.join(os.path.dirname(__file__), script_name)
+        cmd = [sys.executable, script_path] + args_list
+        logger.info(f"Esecuzione: {' '.join(cmd)}")
+        res = subprocess.run(cmd)
+        if res.returncode != 0:
+            logger.error(f"❌ Errore nello script {script_name}")
+            
+    run_script("organize_inbox.py", ["--inbox", str(inbox_dir), "--data_dir", str(data_dir)])
+    run_script("convert_all.py", ["--data_dir", str(data_dir), "--index_file", str(index_path)])
+    run_script("upload_to_firebase.py", ["--user_id", user_id, "--index_file", str(index_path)])
     
-    # organize_inbox
-    import organize_inbox
-    try:
-        organize_inbox.main()
-    except Exception as e:
-        logger.error(f"❌ Errore in organize_inbox: {e}")
-        
-    # convert_all
-    import convert_all
-    try:
-        convert_all.main()
-    except Exception as e:
-        logger.error(f"❌ Errore in convert_all: {e}")
-        
-    # upload_to_firebase (genera anche il briefing AI)
-    import upload_to_firebase
-    try:
-        upload_to_firebase.main()
-    except Exception as e:
-        logger.error(f"❌ Errore in upload_to_firebase: {e}")
+    # generate_diary solo per l'admin (se necessario), oppure disabilitato per i temp
+    if not work_dir:
+        run_script("generate_diary.py", [])
 
-    # generate_diary
-    import generate_diary
-    try:
-        generate_diary.main()
-    except Exception as e:
-        logger.error(f"❌ Errore in generate_diary: {e}")
+    # coach_brain viene eseguito alla fine o come step separato
+    from coach_brain import assess_readiness
+    logger.info("🧠 Avvio Coach Brain...")
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if api_key:
+        try:
+            assess_readiness(db, user_id, api_key)
+        except Exception as e:
+            logger.error(f"❌ Errore Coach Brain: {e}")
+    else:
+        logger.warning("Nessuna GEMINI_API_KEY trovata. Coach Brain saltato.")
 
-    logger.info("🎉 Auto-Fetch completato con successo!")
+    logger.info(f"🎉 Auto-Fetch completato con successo per {user_id}!")
 
 if __name__ == "__main__":
     main()

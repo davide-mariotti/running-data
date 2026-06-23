@@ -20,8 +20,8 @@ const firebaseConfig = {
     measurementId: "G-LEBL4L61KF"
 };
 
-// User ID costante (deve corrispondere a quello nelle Cloud Functions)
-const ATHLETE_USER_ID = "athlete_main";
+// User ID dinamico (impostato al login)
+let ATHLETE_USER_ID = "";
 
 // ═══════════════════════════════════════════════════════════════
 // 🔥 INIT FIREBASE
@@ -65,14 +65,35 @@ btnLogout.addEventListener('click', () => {
     auth.signOut();
 });
 
+// Google Login handler
+const btnGoogle = document.getElementById('btn-google');
+if (btnGoogle) {
+    btnGoogle.addEventListener('click', async () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        try {
+            await auth.signInWithPopup(provider);
+        } catch (error) {
+            console.error("Google Auth Error:", error);
+            loginError.textContent = getAuthErrorMessage(error.code) || `❌ Errore Google: ${error.message}`;
+        }
+    });
+}
+
 // Auth state listener
 auth.onAuthStateChanged((user) => {
     if (user) {
+        ATHLETE_USER_ID = (user.email === 'davide@mariotti.it') ? 'athlete_main' : user.uid;
         loginScreen.style.display = 'none';
         dashboard.style.display = 'block';
+        
         loadDashboardData();
         if (typeof loadData === 'function' && rawData.length === 0) {
             loadData();
+        }
+        
+        // Controlla se l'utente ha inserito le credenziali (se non è l'admin)
+        if (ATHLETE_USER_ID !== 'athlete_main') {
+            checkUserCredentials(user.uid);
         }
     } else {
         loginScreen.style.display = 'flex';
@@ -480,4 +501,73 @@ async function loadSyncStatus() {
 function setText(id, text) {
     const el = document.getElementById(id);
     if (el) el.textContent = text;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ⚙️ GESTIONE CREDENZIALI GARMIN (UTENTI AMICI)
+// ═══════════════════════════════════════════════════════════════
+
+const settingsModal = document.getElementById('settings-modal');
+const closeSettingsBtn = document.getElementById('close-settings');
+const settingsForm = document.getElementById('settings-form');
+const settingsMsg = document.getElementById('settings-msg');
+
+function checkUserCredentials(uid) {
+    db.collection('users').doc(uid).get()
+        .then(doc => {
+            if (!doc.exists || !doc.data().garmin_email || !doc.data().garmin_password) {
+                // Credenziali mancanti, mostra il modal
+                settingsModal.style.display = 'flex';
+            }
+        })
+        .catch(err => {
+            console.error("Errore nel recupero credenziali:", err);
+        });
+}
+
+if (closeSettingsBtn) {
+    closeSettingsBtn.addEventListener('click', () => {
+        settingsModal.style.display = 'none';
+    });
+}
+
+if (settingsForm) {
+    settingsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('garmin-email').value.trim();
+        const pwd = document.getElementById('garmin-password').value.trim();
+        const btn = document.getElementById('btn-save-settings');
+        const text = btn.querySelector('.btn-text');
+        const loader = btn.querySelector('.btn-loader');
+        
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        text.style.display = 'none';
+        loader.style.display = 'inline-block';
+        settingsMsg.textContent = '';
+        settingsMsg.style.color = 'var(--green)';
+        
+        try {
+            await db.collection('users').doc(user.uid).set({
+                garmin_email: email,
+                garmin_password: pwd,
+                updated_at: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            
+            settingsMsg.textContent = 'Credenziali salvate con successo!';
+            setTimeout(() => {
+                settingsModal.style.display = 'none';
+                settingsMsg.textContent = '';
+            }, 2000);
+            
+        } catch (error) {
+            console.error("Errore salvataggio credenziali:", error);
+            settingsMsg.style.color = 'var(--red)';
+            settingsMsg.textContent = 'Errore durante il salvataggio.';
+        } finally {
+            text.style.display = 'inline-block';
+            loader.style.display = 'none';
+        }
+    });
 }

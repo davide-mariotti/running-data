@@ -1,5 +1,5 @@
 // dashboard.js — Ironman Multi-Year Dashboard
-const DATA_URL = 'dashboard_index.json';
+// Fetch dinamico basato sull'utente
 
 // State
 let rawData = [], filteredData = [];
@@ -88,9 +88,26 @@ const SPORT_LABELS = { running:'🏃 Corsa', cycling:'🚴 Bici', swimming:'🏊
 // ── Load ──────────────────────────────────────────────────
 async function loadData() {
     try {
-        const res = await fetch(DATA_URL);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        rawData = await res.json();
+        if (typeof ATHLETE_USER_ID === 'undefined' || !ATHLETE_USER_ID) {
+            console.warn("ATHLETE_USER_ID non ancora impostato, ritento...");
+            setTimeout(loadData, 500);
+            return;
+        }
+
+        if (ATHLETE_USER_ID === 'athlete_main') {
+            const res = await fetch('dashboard_index.json');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            rawData = await res.json();
+        } else {
+            const doc = await db.collection(`athletes/${ATHLETE_USER_ID}/index_data`).doc('dashboard_index').get();
+            if (doc.exists && doc.data().data) {
+                rawData = JSON.parse(doc.data().data);
+            } else {
+                console.log("Nessun indice trovato per questo utente.");
+                rawData = [];
+            }
+        }
+        
         availableYears = [...new Set(rawData.map(a => a.year))].sort();
         
         // Seleziona l'anno attuale di default, altrimenti l'ultimo disponibile

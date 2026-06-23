@@ -37,6 +37,14 @@ def parse_time_to_min(t_str):
     return 0.0
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Upload to Firebase")
+    parser.add_argument("--user_id", default="athlete_main", help="ID Atleta (es. UID Firebase o athlete_main)")
+    parser.add_argument("--index_file", default=None, help="Path del dashboard_index.json")
+    args = parser.parse_args()
+
+    USER_ID = args.user_id
+
     logger.info("🔧 Inizializzazione Firebase Admin...")
     sa_path = root_dir / "service-account.json"
     if not sa_path.exists():
@@ -51,14 +59,23 @@ def main():
     
     db = firestore.client()
 
-    logger.info("📂 Lettura indice dashboard_index.json...")
-    idx_path = root_dir / "frontend" / "dashboard_index.json"
+    logger.info(f"📂 Lettura indice dashboard_index.json per utente: {USER_ID}")
+    idx_path = Path(args.index_file) if args.index_file else (root_dir / "frontend" / "dashboard_index.json")
     if not idx_path.exists():
         logger.error("Indice non trovato. Lancia prima convert_all.py!")
         sys.exit(1)
         
     with open(idx_path, "r", encoding="utf-8") as f:
-        activities = json.load(f)
+        raw_json = f.read()
+        activities = json.loads(raw_json)
+
+    # Se non è l'admin, salviamo il dashboard_index intero su Firestore (come stringa per caricamento rapido)
+    if USER_ID != "athlete_main":
+        logger.info(f"Salvataggio index_data su Firestore per {USER_ID}...")
+        db.collection(f"athletes/{USER_ID}/index_data").document("dashboard_index").set({
+            "data": raw_json,
+            "updated_at": firestore.SERVER_TIMESTAMP
+        })
 
     logger.info(f"🚀 Inizio caricamento {len(activities)} attività su Firebase...")
     

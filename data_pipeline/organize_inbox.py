@@ -149,6 +149,10 @@ def main():
         help="Cartella sorgente dei file (default: ./inbox)"
     )
     parser.add_argument(
+        "--data_dir", default=None,
+        help="Cartella di destinazione base (default: ../data)"
+    )
+    parser.add_argument(
         "--copy", action="store_true",
         help="Copia i file invece di spostarli"
     )
@@ -159,7 +163,7 @@ def main():
     args = parser.parse_args()
 
     root_dir = Path(__file__).parent.parent
-    data_dir = root_dir / "data"
+    data_dir = Path(args.data_dir) if args.data_dir else (root_dir / "data")
     inbox    = Path(args.inbox)
     if not inbox.is_absolute():
         inbox = data_dir / inbox.name

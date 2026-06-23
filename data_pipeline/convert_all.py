@@ -168,9 +168,16 @@ def parse_gpx_meta(gpx_path: Path) -> dict:
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Converti attività in JSON")
+    parser.add_argument("--data_dir", default=None, help="Cartella dati base")
+    parser.add_argument("--index_file", default=None, help="File destinazione per dashboard_index.json")
+    args = parser.parse_args()
+
     root_dir = Path(__file__).parent.parent
-    data_dir = root_dir / "data"
+    data_dir = Path(args.data_dir) if args.data_dir else (root_dir / "data")
     frontend_dir = root_dir / "frontend"
+    index_file = Path(args.index_file) if args.index_file else (frontend_dir / "dashboard_index.json")
 
     print("\n" + "="*50)
     print("INIZIO CONVERSIONE ATTIVITÀ (SETTIMANE UNIFICATE, MULTI-ANNO)")
@@ -290,7 +297,6 @@ def main():
                     dashboard_index.append(index_entry)
 
     # Salva l'indice globale
-    index_file = frontend_dir / "dashboard_index.json"
     with open(index_file, "w", encoding="utf-8") as f:
         json.dump(dashboard_index, f, ensure_ascii=False, indent=2)
 

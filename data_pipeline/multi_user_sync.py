@@ -111,6 +111,8 @@ def main():
             success_count += 1
             
     logger.info(f"Fine sync globale. {success_count}/{len(users)} utenti completati con successo.")
-    
+    if success_count < len(users):
+        sys.exit(1)
+        
 if __name__ == "__main__":
     main()

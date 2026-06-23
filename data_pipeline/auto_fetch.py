@@ -101,8 +101,8 @@ def main():
     existing_ids = load_existing_activity_ids(str(index_path))
     
     activities_fetched = 0
-    # Cerca attività negli ultimi 5 giorni
-    start_date = (today - timedelta(days=5)).strftime("%Y-%m-%d")
+    # Cerca attività negli ultimi 10 giorni
+    start_date = (today - timedelta(days=10)).strftime("%Y-%m-%d")
     end_date = today.strftime("%Y-%m-%d")
     
     try:
@@ -136,6 +136,7 @@ def main():
                         logger.error(f"      ❌ Errore download {act_id}: {download_err}")
     except Exception as e:
         logger.error(f"❌ Errore recupero lista attività: {e}")
+        sys.exit(1)
 
     # 5. Esegui la pipeline
     logger.info("⚙️ Avvio pipeline di conversione dati...")

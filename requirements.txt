@@ -1,5 +1,5 @@
 garminconnect
 firebase-admin
-google-genai
+google-generativeai
 pandas
 python-dotenv

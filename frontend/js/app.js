@@ -433,6 +433,7 @@ function renderBriefings(briefings) {
         const d = new Date(b.date + 'T00:00:00');
         const dateStr = d.toLocaleDateString('it-IT', { weekday: 'short', day: '2-digit', month: 'short' });
         const preview = (b.analysis || '').substring(0, 120).replace(/\n/g, ' ') + '...';
+        const fullHtml = formatAnalysis(b.analysis || '');
         const itemId = `briefing-item-${idx}`;
 
         return `
@@ -440,7 +441,8 @@ function renderBriefings(briefings) {
                 <span class="briefing-emoji">${emoji}</span>
                 <div class="briefing-info">
                     <div class="briefing-date-label">${dateStr} — ${readiness}</div>
-                    <div class="briefing-preview" id="${itemId}-text">${preview}</div>
+                    <div class="briefing-preview" id="${itemId}-preview">${preview}</div>
+                    <div class="briefing-full" id="${itemId}-full" style="display:none; margin-top:8px; line-height:1.5;">${fullHtml}</div>
                 </div>
             </div>
         `;
@@ -448,20 +450,16 @@ function renderBriefings(briefings) {
 }
 
 function toggleBriefing(itemId) {
-    const textEl = document.getElementById(`${itemId}-text`);
-    if (!textEl) return;
+    const previewEl = document.getElementById(`${itemId}-preview`);
+    const fullEl = document.getElementById(`${itemId}-full`);
+    if (!previewEl || !fullEl) return;
 
-    if (textEl.classList.contains('briefing-expanded')) {
-        textEl.classList.remove('briefing-expanded');
-        // Restore preview
-        const full = textEl.getAttribute('data-full');
-        textEl.textContent = full.substring(0, 120).replace(/\n/g, ' ') + '...';
+    if (fullEl.style.display === 'none') {
+        fullEl.style.display = 'block';
+        previewEl.style.display = 'none';
     } else {
-        // First time: store full text
-        if (!textEl.getAttribute('data-full')) {
-            // We'd need the full text here - for now just expand what we have
-        }
-        textEl.classList.add('briefing-expanded');
+        fullEl.style.display = 'none';
+        previewEl.style.display = 'block';
     }
 }
 

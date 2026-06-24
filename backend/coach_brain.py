@@ -12,11 +12,12 @@ import google.generativeai as genai
 from firebase_admin import firestore
 
 from prompts import get_system_prompt, build_daily_trigger, format_data_table
+from compute_load import compute_weekly_load
 
 logger = logging.getLogger(__name__)
 
 
-def assess_readiness(db, user_id: str, gemini_api_key: str) -> dict:
+def assess_readiness(db, user_id: str, gemini_api_key: str, target_date: str = None) -> dict:
     """
     Valuta la readiness dell'atleta analizzando i dati biometrici.
 
@@ -33,10 +34,13 @@ def assess_readiness(db, user_id: str, gemini_api_key: str) -> dict:
     Returns:
         Dict con il briefing completo
     """
-    today = datetime.now().strftime("%Y-%m-%d")
-    start_date = (datetime.now() - timedelta(days=14)).strftime("%Y-%m-%d")
+    if not target_date:
+        target_date = datetime.now().strftime("%Y-%m-%d")
+    
+    target_dt = datetime.strptime(target_date, "%Y-%m-%d")
+    start_date = (target_dt - timedelta(days=14)).strftime("%Y-%m-%d")
 
-    logger.info(f"🤖 Avvio analisi readiness per {today}...")
+    logger.info(f"🤖 Avvio analisi readiness per {target_date}...")
 
     # ── 1. Carica profilo atleta ──────────────────────────────
     profile_doc = db.collection("athletes").document(user_id).get()
@@ -54,12 +58,12 @@ def assess_readiness(db, user_id: str, gemini_api_key: str) -> dict:
         }
 
     # ── 2. Carica dati biometrici (ultimi 14 giorni) ──────────
-    sleep_docs = _fetch_collection(db, user_id, "sleep", start_date, today)
-    hrv_docs = _fetch_collection(db, user_id, "hrv", start_date, today)
-    battery_docs = _fetch_collection(db, user_id, "body_battery", start_date, today)
-    rhr_docs = _fetch_collection(db, user_id, "resting_hr", start_date, today)
-    stress_docs = _fetch_collection(db, user_id, "stress", start_date, today)
-    runs_docs = _fetch_collection(db, user_id, "runs", start_date, today)
+    sleep_docs = _fetch_collection(db, user_id, "sleep", start_date, target_date)
+    hrv_docs = _fetch_collection(db, user_id, "hrv", start_date, target_date)
+    battery_docs = _fetch_collection(db, user_id, "body_battery", start_date, target_date)
+    rhr_docs = _fetch_collection(db, user_id, "resting_hr", start_date, target_date)
+    stress_docs = _fetch_collection(db, user_id, "stress", start_date, target_date)
+    runs_docs = _fetch_collection(db, user_id, "runs", start_date, target_date)
 
     logger.info(
         f"📦 Dati caricati: {len(sleep_docs)} sleep, {len(hrv_docs)} HRV, "
@@ -67,9 +71,9 @@ def assess_readiness(db, user_id: str, gemini_api_key: str) -> dict:
         f"{len(stress_docs)} stress, {len(runs_docs)} runs"
     )
 
-    # ── 3. Carica dati di carico ──────────────────────────────
-    load_doc = db.collection(f"athletes/{user_id}/weekly_load").document("latest").get()
-    load_data = load_doc.to_dict() if load_doc.exists else {}
+    # ── 3. Carica dati di carico per la data specifica ────────
+    load_doc = compute_weekly_load(db, user_id, target_date)
+    load_data = load_doc if load_doc else {}
 
     # ── 4. Formatta tabelle per il prompt ─────────────────────
     sleep_table = format_data_table(sleep_docs, [
@@ -118,7 +122,7 @@ def assess_readiness(db, user_id: str, gemini_api_key: str) -> dict:
     system_prompt = get_system_prompt(profile)
 
     trigger_data = {
-        "date": today,
+        "date": target_date,
         "sleep_table": sleep_table,
         "hrv_table": hrv_table,
         "battery_table": battery_table,
@@ -153,7 +157,7 @@ def assess_readiness(db, user_id: str, gemini_api_key: str) -> dict:
 
     # ── 8. Salva briefing su Firestore ────────────────────────
     briefing = {
-        "date": today,
+        "date": target_date,
         "readiness": readiness,
         "analysis": ai_response,
         "data_summary": {
@@ -166,10 +170,10 @@ def assess_readiness(db, user_id: str, gemini_api_key: str) -> dict:
         "created_at": firestore.SERVER_TIMESTAMP,
     }
 
-    ref = db.collection(f"athletes/{user_id}/briefings").document(today)
+    ref = db.collection(f"athletes/{user_id}/briefings").document(target_date)
     ref.set(briefing)
 
-    logger.info(f"✅ Briefing salvato: {readiness} per {today}")
+    logger.info(f"✅ Briefing salvato: {readiness} per {target_date}")
     return briefing
 
 

@@ -180,7 +180,17 @@ def main():
     api_key = os.environ.get("GEMINI_API_KEY")
     if api_key:
         try:
-            assess_readiness(db, user_id, api_key)
+            # Genera/Rigenera il briefing di oggi e recupera gli ultimi 7 giorni se mancano
+            for i in reversed(range(7)):
+                d_str = (today - timedelta(days=i)).strftime("%Y-%m-%d")
+                if i == 0:
+                    logger.info(f"🔄 Generazione briefing per oggi ({d_str})...")
+                    assess_readiness(db, user_id, api_key, target_date=d_str)
+                else:
+                    b_doc = db.collection(f"athletes/{user_id}/briefings").document(d_str).get()
+                    if not b_doc.exists:
+                        logger.info(f"⏳ Briefing mancante per {d_str}, lo genero in background...")
+                        assess_readiness(db, user_id, api_key, target_date=d_str)
         except Exception as e:
             logger.error(f"❌ Errore Coach Brain: {e}")
     else:

@@ -65,6 +65,13 @@ CSV_KEY_MAP = {
     "Passo medio in movimento min/km":                     "passo_medio_in_movimento",
     "Perdita velocità di passo media cm/s":                "perdita_velocita_cms",
     "Percentuale perdita velocità di passo media %":       "perdita_velocita_pct",
+    "Frequenza cardiaca media":                            "fc_media_bpm",
+    "FC max":                                              "fc_max_bpm",
+    "Ritmo di corsa media":                                "cadenza_media_pam",
+    "Ritmo di corsa max":                                  "cadenza_max_pam",
+    "Aumento di altitudine":                               "ascesa_m",
+    "Perdita quota":                                       "discesa_m",
+    "Tempo intermedio":                                    "lap",
 }
 
 def normalize_key(k: str, sport: str) -> str:
@@ -92,6 +99,8 @@ def normalize_key(k: str, sport: str) -> str:
         if k == "Discesa totale": return "discesa_m"
         if k == "Cadenza pedalata media": return "cadenza_pedalata_media_rpm"
         if k == "Cadenza pedalata max": return "cadenza_pedalata_max_rpm"
+    elif sport == "running":
+        if k == "Distanza": return "distanza_km"
     
     mapped = CSV_KEY_MAP.get(k)
     if mapped:
@@ -124,13 +133,13 @@ def parse_csv(csv_path: Path, sport: str) -> dict:
     with open(csv_path, encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            lap_label = row.get("Lap", row.get("Ripetute", "")).strip()
+            lap_label = row.get("Lap", row.get("Ripetute", row.get("Tempo intermedio", ""))).strip()
             record = {}
             for k, v in row.items():
                 norm_k = normalize_key(k, sport)
                 if norm_k:
                     record[norm_k] = clean_value(v)
-            if lap_label == "Riepilogo":
+            if lap_label.lower() in ["riepilogo", "summary"]:
                 summary = record
             else:
                 laps.append(record)

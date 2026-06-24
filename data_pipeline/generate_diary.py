@@ -29,12 +29,13 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 from datetime import date
+import argparse
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 # --- Configurazione ---
 ROOT_DIR = Path(__file__).parent.parent
 DIARY_DIR = ROOT_DIR / "frontend" / "diary"
-HR_MAX_ATHLETE = 189  # FC Max dell'atleta — usata per calcolare l'Indice di Intensità Cardiaca
-
 # -------------------------------------------------------------------------
 # Caricamento .env
 # -------------------------------------------------------------------------
@@ -225,7 +226,7 @@ def parse_activity_json(file_path):
 # -------------------------------------------------------------------------
 # Formattazione del testo di attività per il prompt
 # -------------------------------------------------------------------------
-def build_activity_prompt_text(act: dict) -> str:
+def build_activity_prompt_text(act, max_hr=190):
     """
     Converte il dizionario di un'attività in un testo ricco e strutturato
     per l'invio al modello AI.
@@ -254,8 +255,8 @@ def build_activity_prompt_text(act: dict) -> str:
         lines.append(f"- **Frequenza Cardiaca:** Media {fc_med or 'N/D'} bpm | Max {fc_max or 'N/D'} bpm")
 
     # Indice di Intensità Cardiaca (rapporto FC media / FC Max atleta)
-    if fc_med and isinstance(fc_med, (int, float)) and fc_med > 0:
-        hr_intensity = (fc_med / HR_MAX_ATHLETE) * 100
+    if fc_med and isinstance(fc_med, (int, float)) and fc_med > 0 and max_hr:
+        hr_intensity = (fc_med / max_hr) * 100
         if hr_intensity >= 92:
             intensity_label = "SFORZO MASSIMALE — l'atleta ha dato tutto"
         elif hr_intensity >= 85:
@@ -266,7 +267,7 @@ def build_activity_prompt_text(act: dict) -> str:
             intensity_label = "SFORZO CONSERVATIVO — nessuna spinta al limite"
         else:
             intensity_label = "SFORZO LEGGERO — ritmo controllato"
-        lines.append(f"- **Indice Intensità Cardiaca:** {hr_intensity:.1f}% della FC Max ({fc_med}/{HR_MAX_ATHLETE} bpm) → {intensity_label}")
+        lines.append(f"- **Indice Intensità Cardiaca:** {hr_intensity:.1f}% della FC Max ({fc_med}/{max_hr} bpm) → {intensity_label}")
 
     # Ascesa/discesa
     if s.get("ascesa_m"):
@@ -378,77 +379,79 @@ def build_activity_prompt_text(act: dict) -> str:
     return "\n".join(lines)
 
 # -------------------------------------------------------------------------
-# System instruction (profilo completo dell'atleta + persona del coach)
-# -------------------------------------------------------------------------
-def build_system_instruction() -> str:
+def build_system_instruction(profile: dict) -> str:
+    name = profile.get("name", "Atleta")
+    max_hr = profile.get("max_hr", "N/A")
+    resting_hr = profile.get("resting_hr", "N/A")
+    lthr = profile.get("lthr", "N/A")
+    z1 = profile.get("z1_bottom", "N/A")
+    z2 = profile.get("z2_bottom", "N/A")
+    z3 = profile.get("z3_bottom", "N/A")
+    z4 = profile.get("z4_bottom", "N/A")
+    z5 = profile.get("z5_bottom", "N/A")
+    z2_ceiling = profile.get("z2_ceiling", "N/A")
+
+    if name == "athlete_main" or "Davide" in str(name):
+        name_display = "DAVIDE MARIOTTI"
+        storia = (
+            "### STORIA E PROGRESSIONE\n"
+            "- Davide parte da ZERO come runner (la settimana 2024_W36 rappresenta le sue PRIMISSIME uscite di corsa in assoluto).\n"
+            "- Non trattarlo come un atleta esperto nelle settimane iniziali: il diario documenta la sua crescita da principiante.\n"
+            "- **IMPORTANTE:** Davide ha acquistato la bici alla W16/2026. Prima di quella data, l'assenza di dati ciclismo è NORMALE e NON va mai commentata negativamente.\n"
+            "- **IMPORTANTE:** Davide ha iniziato il corso di nuoto alla W18/2026. Prima di quella data, l'assenza di dati nuoto è NORMALE e NON va mai commentata negativamente.\n\n"
+            "### TIMELINE GARE E OBIETTIVI\n"
+            "1. 8 Dicembre 2024: Prima Mezza Maratona (senza preparazione specifica)\n"
+            "2. Aprile 2025: Seconda Mezza Maratona (con preparazione strutturata)\n"
+            "3. 30 Novembre 2025: Prima Maratona Completa (42 km)\n"
+            "4. 29 Marzo 2026: Mezza Maratona\n"
+            "5. 11 Ottobre 2026: Mezza Maratona\n"
+            "6. 29 Novembre 2026: Maratona Completa — **OBIETTIVO PRINCIPALE: 3h30' (passo 4'58\"/km) con FC massima 150 bpm**\n"
+            "7. 2 Maggio 2027: Ironman 70.3 (primo triathlon — primo obiettivo multisport)\n\n"
+            "### OBIETTIVI ALLENAMENTO\n"
+            "- Migliorare l'efficienza aerobica: ridurre la FC a parità di passo\n"
+            "- Ritmi lenti più veloci, minore stress cardiaco in maratona\n"
+            "- Migliore economia di corsa\n"
+            "- Sviluppo base aerobica e controllo FC\n"
+            "- Progressione graduale del volume\n"
+            "- Lavori specifici di soglia e aumento VO2Max\n"
+        )
+    else:
+        name_display = str(name).upper()
+        storia = (
+            "### STORIA E PROGRESSIONE\n"
+            "- Atleta in monitoraggio. Adatta i commenti ai ritmi e alla FC letta dai dati.\n\n"
+            "### OBIETTIVI ALLENAMENTO\n"
+            "- Migliorare l'efficienza aerobica e la gestione degli sforzi.\n"
+            "- Sviluppo base aerobica e controllo FC.\n"
+        )
+
     return (
-        "Sei un Coach d'élite specializzato in Triathlon e Maratona, esperto nell'analisi di dati fisiologici "
-        "e metriche avanzate Garmin. Sei empatico e motivante, ma estremamente schietto: ti basi sulla realtà "
-        "dei fatti, correggendo dolcemente ma fermamente le convinzioni errate dell'atleta (es. recupero, "
-        "idratazione, gestione sforzo). Non fingere emozioni umane, ma specchia l'entusiasmo e il tono "
-        "informale dell'utente.\n\n"
-
-        "## PROFILO COMPLETO DELL'ATLETA: DAVIDE MARIOTTI\n\n"
-
-        "### STORIA E PROGRESSIONE\n"
-        "- Davide parte da ZERO come runner (la settimana 2024_W36 rappresenta le sue PRIMISSIME uscite di corsa in assoluto).\n"
-        "- Non trattarlo come un atleta esperto nelle settimane iniziali: il diario documenta la sua crescita da principiante.\n"
-        "- **IMPORTANTE:** Davide ha acquistato la bici alla W16/2026. Prima di quella data, l'assenza di dati ciclismo è NORMALE e NON va mai commentata negativamente.\n"
-        "- **IMPORTANTE:** Davide ha iniziato il corso di nuoto alla W18/2026. Prima di quella data, l'assenza di dati nuoto è NORMALE e NON va mai commentata negativamente.\n\n"
-
-        "### TIMELINE GARE E OBIETTIVI\n"
-        "1. 8 Dicembre 2024: Prima Mezza Maratona (senza preparazione specifica)\n"
-        "2. Aprile 2025: Seconda Mezza Maratona (con preparazione strutturata)\n"
-        "3. 30 Novembre 2025: Prima Maratona Completa (42 km)\n"
-        "4. 29 Marzo 2026: Mezza Maratona\n"
-        "5. 11 Ottobre 2026: Mezza Maratona\n"
-        "6. 29 Novembre 2026: Maratona Completa — **OBIETTIVO PRINCIPALE: 3h30' (passo 4'58\"/km) con FC massima 150 bpm**\n"
-        "7. 2 Maggio 2027: Ironman 70.3 (primo triathlon — primo obiettivo multisport)\n\n"
-
-        "### OBIETTIVI ALLENAMENTO\n"
-        "- Migliorare l'efficienza aerobica: ridurre la FC a parità di passo\n"
-        "- Ritmi lenti più veloci, minore stress cardiaco in maratona\n"
-        "- Migliore economia di corsa\n"
-        "- Sviluppo base aerobica e controllo FC\n"
-        "- Progressione graduale del volume\n"
-        "- Lavori specifici di soglia e aumento VO2Max\n\n"
-
-        "### PARAMETRI FISIOLOGICI\n"
-        "- FC Max: 189 bpm\n"
-        "- FC a Riposo: 44 bpm\n"
-        "- rFTPw (Soglia Potenza Corsa): 344 Watt\n"
-        "- FTP Bici: non ancora misurata formalmente\n\n"
-
-        "### ZONE CARDIO PER SPORT\n"
-        "**Corsa:**\n"
-        "- Z1: 120-130 bpm | Z2: 131-150 bpm | Z3: 151-165 bpm | Z4: 166-180 bpm | Z5: >180 bpm\n\n"
-        "**Bici:**\n"
-        "- Z1: 112-122 bpm | Z2: 123-142 bpm | Z3: 143-157 bpm | Z4: 158-172 bpm | Z5: >172 bpm\n\n"
-        "**Nuoto:**\n"
-        "- Z1: 105-115 bpm | Z2: 116-135 bpm | Z3: 136-150 bpm | Z4: 151-165 bpm | Z5: >165 bpm\n\n"
-
+        f"Sei un Coach d'élite specializzato in Triathlon e Maratona, esperto nell'analisi di dati fisiologici "
+        f"e metriche avanzate Garmin. Sei empatico e motivante, ma estremamente schietto: ti basi sulla realtà "
+        f"dei fatti, correggendo dolcemente ma fermamente le convinzioni errate dell'atleta. Non fingere emozioni "
+        f"umane, ma specchia l'entusiasmo e il tono informale dell'utente.\n\n"
+        f"## PROFILO COMPLETO DELL'ATLETA: {name_display}\n\n"
+        f"{storia}\n"
+        f"### PARAMETRI FISIOLOGICI\n"
+        f"- FC Max: {max_hr} bpm\n"
+        f"- FC a Riposo: {resting_hr} bpm\n"
+        f"- Soglia (LTHR): {lthr} bpm\n\n"
+        f"### ZONE CARDIO PER SPORT (CORSA)\n"
+        f"- Z1 (Recupero): {z1}+ bpm\n"
+        f"- Z2 (Fondo Lento): {z2} - {z2_ceiling} bpm\n"
+        f"- Z3 (Fondo Medio): {z3}+ bpm\n"
+        f"- Z4 (Soglia): {z4}+ bpm\n"
+        f"- Z5 (VO2Max): {z5}+ bpm\n\n"
         "### BENCHMARK METRICHE BIOMECCANICHE (CORSA)\n"
         "- **TCS (Tempo Contatto Suolo):** <250ms = élite, 250-270ms = buono, >270ms = da migliorare\n"
         "- **Bilanciamento TCS:** ideale 50/50 — segnalare asimmetrie >1.5% come potenziale rischio infortuni\n"
         "- **Oscillazione Verticale:** <8.0cm = ottima, 8.0-9.0cm = buona, >9.0cm = elevata (energia sprecata)\n"
         "- **Rapporto Verticale:** <8.5% = eccellente, 8.5-10% = buono, >10% = da correggere\n"
         "- **Cadenza:** 175-185 spm = target élite\n\n"
-
-        "### PIANO DI ALLENAMENTO (Metodo simil-FIRST)\n"
-        "- 3 corse (Qualità / Medio / Lungo)\n"
-        "- 2 nuoti\n"
-        "- 1-2 uscite in bici\n"
-        "- Approccio multidisciplinare per ottimizzare il motore aerobico salvando le articolazioni\n\n"
-
-        "### ATTREZZATURA\n"
-        "- **Bici:** Wilier con prolunghe aerodinamiche (Profile Design Sonic/Ergo/35a) e sella da triathlon (ISM PN 3.0)\n"
-        "- **Corsa (lunghi):** Gilet idrico da trail per 1-1.5L di liquidi\n\n"
-
         "### STRATEGIA NUTRIZIONALE\n"
         "- **Idratazione:** 1 grammo di sale ogni 500ml d'acqua; bere a piccoli sorsi continui (un sorso ogni km)\n"
         "- **Integrazione corsa:** 1 gel energetico (30-40g) ogni 7 km esatti\n"
         "- **Gel caffeina:** nell'ultimo terzo di gara/allenamento lungo\n\n"
-
         "### AREE DI ATTENZIONE PRIORITARIE\n"
         "- Deriva cardiaca (FC che sale a passo costante = fatica accumulata)\n"
         "- Rapporto passo/FC\n"
@@ -620,8 +623,13 @@ def call_gemini_api(api_key: str, system_instruction: str, user_prompt: str,
 # Main
 # -------------------------------------------------------------------------
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--user_id", type=str, default="athlete_main", help="ID Utente")
+    args = parser.parse_args()
+    user_id = args.user_id
+
     print("\n" + "=" * 60)
-    print("DIARIO DELL'ALLENATORE AI — GENERATORE REPORT SETTIMANALI")
+    print(f"DIARIO DELL'ALLENATORE AI — GENERATORE REPORT ({user_id})")
     print("=" * 60)
 
     # 1. Carica configurazione
@@ -641,6 +649,22 @@ def main():
     print(f"[INFO] Modello: {model_name}")
 
     DIARY_DIR.mkdir(exist_ok=True)
+    
+    # 1.b Inizializza Firebase
+    sa_path = ROOT_DIR / "service-account.json"
+    if sa_path.exists():
+        cred = credentials.Certificate(str(sa_path))
+    else:
+        cred = credentials.ApplicationDefault()
+        
+    if not firebase_admin._apps:
+        firebase_admin.initialize_app(cred, {'projectId': 'running-data-445817'})
+    db = firestore.client()
+    
+    # 1.c Carica Profilo
+    profile_doc = db.collection("athletes").document(user_id).get()
+    profile = profile_doc.to_dict() if profile_doc.exists else {"name": user_id}
+    max_hr = profile.get("max_hr", 190)
 
     # 2. Scansione cartelle output
     data_dir = ROOT_DIR / "data"
@@ -722,7 +746,7 @@ def main():
         is_test_mode = True
 
     # 5. Prepara system instruction (fissa per tutte le settimane)
-    system_instruction = build_system_instruction()
+    system_instruction = build_system_instruction(profile)
 
     # 6. Elaborazione progressiva
     processed_count = 0
@@ -731,7 +755,7 @@ def main():
         week_id = f"{wk['year']}_{wk['week_name']}"
         year_dir = DIARY_DIR / wk['year']
         year_dir.mkdir(parents=True, exist_ok=True)
-        report_file = year_dir / f"{week_id}_report.md"
+        report_file = year_dir / f"{week_id}_{user_id}_report.md"
 
         if report_file.exists() and not is_test_mode:
             continue
@@ -748,7 +772,7 @@ def main():
         for jf in json_files:
             act = parse_activity_json(jf)
             if act:
-                activities_text += build_activity_prompt_text(act) + "\n"
+                activities_text += build_activity_prompt_text(act, max_hr=max_hr) + "\n"
 
         if not activities_text.strip():
             print(f"  [WARNING] Nessuna attività valida per {week_id}, salto.")
@@ -784,7 +808,18 @@ def main():
             if report_content:
                 with open(report_file, "w", encoding="utf-8") as f:
                     f.write(report_content)
-                print(f"  [OK] Report salvato: {report_file}")
+                print(f"  [OK] Report salvato localmente: {report_file}")
+                
+                # Salva su Firestore per lettura multi-utente
+                try:
+                    db.collection(f"athletes/{user_id}/diaries").document(week_id).set({
+                        "week_id": week_id,
+                        "content": report_content,
+                        "updated_at": firestore.SERVER_TIMESTAMP
+                    }, merge=True)
+                    print(f"  [OK] Report salvato su Firestore per l'utente {user_id}")
+                except Exception as db_err:
+                    print(f"  [ERRORE] Salvataggio su Firestore fallito: {db_err}")
 
                 p_tokens = usage.get("promptTokenCount", 0)
                 c_tokens = usage.get("candidatesTokenCount", 0)

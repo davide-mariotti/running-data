@@ -24,12 +24,18 @@ def main():
     zones = garmin.detect_hr_zones()
     if zones:
         profile = {
-            "name": "Davide",
+            "name": user_id,
             "z2_ceiling": zones.get("z2_ceiling", 150),
             "lthr": zones.get("lthr", 170),
             "max_hr": zones.get("max_hr", 190),
-            "easy_pace": "6:30",
-            "threshold_pace": "4:45",
+            "resting_hr": zones.get("resting_hr", 50),
+            "z1_bottom": zones.get("z1_bottom"),
+            "z2_bottom": zones.get("z2_bottom"),
+            "z3_bottom": zones.get("z3_bottom"),
+            "z4_bottom": zones.get("z4_bottom"),
+            "z5_bottom": zones.get("z5_bottom"),
+            "easy_pace": "6:00",
+            "threshold_pace": "4:30",
             "auto_detected": True,
             "updated_at": firestore.SERVER_TIMESTAMP,
         }

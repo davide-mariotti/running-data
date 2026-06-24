@@ -314,26 +314,52 @@ class GarminSync:
     # ── Auto-detect HR Zones ─────────────────────────────────────
 
     def detect_hr_zones(self):
-        """Estrae le zone HR da Garmin per impostare il profilo base."""
+        """Estrae le zone HR da Garmin per impostare il profilo base usando il Metodo Karvonen."""
         try:
             profile = self.client.get_user_profile()
             user_data = profile.get("userData", {})
             lthr = user_data.get("lactateThresholdHeartRate")
+            max_hr = user_data.get("maxHeartRate")
+            resting_hr = user_data.get("restingHeartRate")
             
-            # Garmin doesn't explicitly return the absolute Max HR in this payload 
-            # or it might be in another endpoint. LTHR is usually 85-90% of Max HR.
-            if lthr:
-                z2_ceiling = int(lthr * 0.85)  # Approssimazione zona 2
-                max_hr = int(lthr / 0.88)
-            else:
-                lthr = 170
-                z2_ceiling = 150
+            # Se FC Max o Riposo mancano dal profilo principale, proviamo le metriche di oggi
+            if not max_hr or not resting_hr:
+                try:
+                    today = datetime.now().strftime("%Y-%m-%d")
+                    hr_zones_data = self.client.get_heart_rates(today)
+                    if hr_zones_data:
+                        max_hr = max_hr or hr_zones_data.get("maxHeartRate")
+                        resting_hr = resting_hr or hr_zones_data.get("restingHeartRate")
+                except Exception as e:
+                    logger.debug(f"Impossibile leggere max/rest hr giornalieri: {e}")
+                    
+            if not max_hr:
                 max_hr = 190
+            if not resting_hr:
+                resting_hr = 50
+                
+            reserve = max_hr - resting_hr
+            
+            # Metodo Karvonen
+            z1 = int(resting_hr + reserve * 0.50)
+            z2 = int(resting_hr + reserve * 0.60)
+            z3 = int(resting_hr + reserve * 0.70)
+            z4 = int(resting_hr + reserve * 0.80)
+            z5 = int(resting_hr + reserve * 0.90)
+            
+            z2_ceiling = z3  # Il tetto della zona 2 coincide col fondo della zona 3
+            lthr_est = lthr or int(resting_hr + reserve * 0.85)
                 
             return {
                 "max_hr": max_hr,
-                "lthr": lthr,
-                "z2_ceiling": z2_ceiling
+                "resting_hr": resting_hr,
+                "lthr": lthr_est,
+                "z2_ceiling": z2_ceiling,
+                "z1_bottom": z1,
+                "z2_bottom": z2,
+                "z3_bottom": z3,
+                "z4_bottom": z4,
+                "z5_bottom": z5
             }
         except Exception as e:
             logger.warning(f"⚠️ Impossibile rilevare zone HR: {e}")

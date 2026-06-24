@@ -116,27 +116,49 @@ def main():
     except Exception:
         pass
 
-    if max_hr:
-        reserve = max_hr - (resting_hr or 60)
-        z2_ceiling = int((resting_hr or 60) + reserve * 0.70)
-        lthr = int((resting_hr or 60) + reserve * 0.85)
+    if max_hr and resting_hr:
+        reserve = max_hr - resting_hr
+        # Karvonen method
+        z1 = int(resting_hr + reserve * 0.50)
+        z2 = int(resting_hr + reserve * 0.60)
+        z3 = int(resting_hr + reserve * 0.70)
+        z4 = int(resting_hr + reserve * 0.80)
+        z5 = int(resting_hr + reserve * 0.90)
+        
+        z2_ceiling = z3
+        lthr = int(resting_hr + reserve * 0.85)
         print(f"   ✅ FC Max: {max_hr} bpm")
-        print(f"   ✅ Resting HR: {resting_hr or 'non rilevata'} bpm")
-        print(f"   ✅ Z2 Ceiling (stimato): {z2_ceiling} bpm")
-        print(f"   ✅ Soglia LTHR (stimata): {lthr} bpm")
+        print(f"   ✅ FC a Riposo: {resting_hr} bpm")
+        print(f"   ✅ Zone Karvonen: Z1 {z1}+ | Z2 {z2}+ | Z3 {z3}+ | Z4 {z4}+ | Z5 {z5}+")
+        print(f"   ✅ Z2 Ceiling: {z2_ceiling} bpm")
+        print(f"   ✅ Soglia LTHR: {lthr} bpm")
     else:
-        print("   ⚠️ Impossibile rilevare automaticamente le zone HR")
+        print("   ⚠️ Impossibile rilevare automaticamente le zone HR (manca FC Max o Riposo)")
         print("   Inserisci manualmente:")
         try:
             max_hr = int(input("   FC Max: "))
-            resting_hr = int(input("   Resting HR: "))
-            z2_ceiling = int(input("   Z2 Ceiling (tetto del facile): "))
-            lthr = int(input("   Soglia (LTHR): "))
+            resting_hr = int(input("   FC a Riposo: "))
+            
+            reserve = max_hr - resting_hr
+            z1 = int(resting_hr + reserve * 0.50)
+            z2 = int(resting_hr + reserve * 0.60)
+            z3 = int(resting_hr + reserve * 0.70)
+            z4 = int(resting_hr + reserve * 0.80)
+            z5 = int(resting_hr + reserve * 0.90)
+            
+            z2_ceiling = int(input(f"   Z2 Ceiling (es. {z3}): ") or z3)
+            lthr = int(input(f"   Soglia LTHR (es. {int(resting_hr + reserve * 0.85)}): ") or int(resting_hr + reserve * 0.85))
         except ValueError:
             print("   ⚠️ Valori non validi, uso default")
             max_hr = 190
             resting_hr = 50
-            z2_ceiling = 150
+            reserve = max_hr - resting_hr
+            z1 = int(resting_hr + reserve * 0.50)
+            z2 = int(resting_hr + reserve * 0.60)
+            z3 = int(resting_hr + reserve * 0.70)
+            z4 = int(resting_hr + reserve * 0.80)
+            z5 = int(resting_hr + reserve * 0.90)
+            z2_ceiling = z3
             lthr = 170
 
     # ── 5. Crea Profilo Atleta ────────────────────────────────
@@ -152,8 +174,13 @@ def main():
         "name": name,
         "max_hr": max_hr,
         "resting_hr": resting_hr,
-        "z2_ceiling": z2_ceiling,
         "lthr": lthr,
+        "z2_ceiling": z2_ceiling,
+        "z1_bottom": z1,
+        "z2_bottom": z2,
+        "z3_bottom": z3,
+        "z4_bottom": z4,
+        "z5_bottom": z5,
         "easy_pace": easy_pace,
         "threshold_pace": threshold_pace,
         "auto_detected": max_hr is not None,

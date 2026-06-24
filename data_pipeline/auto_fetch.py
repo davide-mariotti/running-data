@@ -171,9 +171,8 @@ def main():
     run_script("convert_all.py", ["--data_dir", str(data_dir), "--index_file", str(index_path)])
     run_script("upload_to_firebase.py", ["--user_id", user_id, "--index_file", str(index_path)])
     
-    # generate_diary solo per l'admin (se necessario), oppure disabilitato per i temp
-    if not work_dir:
-        run_script("generate_diary.py", [])
+    # generate_diary per tutti gli utenti, passando il parametro user_id
+    run_script("generate_diary.py", ["--user_id", user_id])
 
     # coach_brain viene eseguito alla fine o come step separato
     from coach_brain import assess_readiness

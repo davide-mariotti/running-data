@@ -17,9 +17,15 @@ def get_system_prompt(profile: dict) -> str:
     Returns:
         System prompt completo come stringa
     """
-    z2 = profile.get("z2_ceiling", "N/A")
+    z1 = profile.get("z1_bottom", "N/A")
+    z2 = profile.get("z2_bottom", "N/A")
+    z3 = profile.get("z3_bottom", "N/A")
+    z4 = profile.get("z4_bottom", "N/A")
+    z5 = profile.get("z5_bottom", "N/A")
+    z2_ceiling = profile.get("z2_ceiling", "N/A")
     lthr = profile.get("lthr", "N/A")
     max_hr = profile.get("max_hr", "N/A")
+    resting_hr = profile.get("resting_hr", "N/A")
     easy_pace = profile.get("easy_pace", "N/A")
     threshold_pace = profile.get("threshold_pace", "N/A")
     name = profile.get("name", "Atleta")
@@ -28,10 +34,13 @@ def get_system_prompt(profile: dict) -> str:
 
 ⚠️ NON gestisci il piano di allenamento. Analizzi esclusivamente i dati per valutare lo stato fisico dell'atleta.
 
-📋 PROFILO ATLETA:
-- Z2 ceiling (tetto del facile): {z2} bpm
-- Soglia (LTHR): {lthr} bpm
-- FC Max: {max_hr} bpm
+📋 PROFILO ATLETA E ZONE CARDIO:
+- FC a Riposo: {resting_hr} bpm | FC Max: {max_hr} bpm | Soglia (LTHR): {lthr} bpm
+- Z1 (Recupero): {z1}+ bpm
+- Z2 (Fondo Lento): {z2} - {z2_ceiling} bpm
+- Z3 (Fondo Medio): {z3}+ bpm
+- Z4 (Soglia): {z4}+ bpm
+- Z5 (VO2Max): {z5}+ bpm
 - Passo facile: {easy_pace}/km
 - Passo soglia: {threshold_pace}/km
 

@@ -3,6 +3,7 @@ import sys
 import json
 import logging
 from datetime import datetime, timedelta
+from pathlib import Path
 
 # Add functions to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'backend'))
@@ -16,16 +17,24 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 def load_existing_activity_ids(index_path):
-    """Carica gli ID delle attività già presenti in dashboard_index.json per evitare duplicati."""
-    if not os.path.exists(index_path):
-        return set()
-    try:
-        with open(index_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            return {str(act.get("activity_id")) for act in data if act.get("activity_id")}
-    except Exception as e:
-        logger.warning(f"Impossibile leggere l'index: {e}")
-        return set()
+    """Carica gli ID e trova l'ultima data."""
+    existing_ids = set()
+    latest_date = None
+    if os.path.exists(index_path):
+        try:
+            with open(index_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                for act in data:
+                    if act.get("activity_id"):
+                        existing_ids.add(str(act.get("activity_id")))
+                    # Cerca l'ultima data
+                    d = act.get("date")
+                    if d:
+                        if not latest_date or d > latest_date:
+                            latest_date = d
+        except Exception as e:
+            logger.warning(f"Impossibile leggere l'index: {e}")
+    return existing_ids, latest_date
 
 def main():
     import argparse
@@ -98,12 +107,20 @@ def main():
     os.makedirs(inbox_dir, exist_ok=True)
     os.makedirs(data_dir, exist_ok=True)
     
-    existing_ids = load_existing_activity_ids(str(index_path))
+    existing_ids, latest_date = load_existing_activity_ids(str(index_path))
     
     activities_fetched = 0
-    # Cerca attività negli ultimi 10 giorni
-    start_date = (today - timedelta(days=10)).strftime("%Y-%m-%d")
     end_date = today.strftime("%Y-%m-%d")
+    
+    # Se abbiamo già dati, cerchiamo dagli ultimi 10 giorni rispetto all'ultimo allenamento salvato
+    # Altrimenti partiamo dal 2010 per scaricare tutto lo storico
+    if latest_date:
+        last_d = datetime.strptime(latest_date, "%Y-%m-%d")
+        start_date = (last_d - timedelta(days=10)).strftime("%Y-%m-%d")
+    else:
+        start_date = "2010-01-01"
+        
+    logger.info(f"📅 Ricerca attività da {start_date} a {end_date}...")
     
     try:
         activities = sync.client.get_activities_by_date(start_date, end_date)

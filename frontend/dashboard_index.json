@@ -13589,5 +13589,29 @@
       "temperatura_med": 24.72,
       "calorie": 871
     }
+  },
+  {
+    "activity_id": "23379353066",
+    "year": "2026",
+    "week": "W26",
+    "sport": "swimming",
+    "name": "Swim - corso 18",
+    "date": "2026-06-25",
+    "start_time_utc": "2026-06-25T17:48:25.000Z",
+    "summary": {
+      "lap": "Summary",
+      "stile": null,
+      "vasche": 39,
+      "distanza_m": 975.0,
+      "tempo": "00:42:48.912",
+      "passo_medio": "2:35",
+      "passo_migliore": "0:",
+      "swolf_medio": 52.0,
+      "fc_media_bpm": 110.0,
+      "fc_max_bpm": 163.0,
+      "totale_bracciate": 539,
+      "bracciate_medie": 13.800000190734863,
+      "calorie": 271
+    }
   }
 ]

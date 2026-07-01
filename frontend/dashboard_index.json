@@ -13664,5 +13664,32 @@
       "temperatura_med": 24.47,
       "calorie": 1027
     }
+  },
+  {
+    "activity_id": "23437685762",
+    "year": "2026",
+    "week": "W27",
+    "sport": "running",
+    "name": "W14 - Tempo Run 8km@4.45",
+    "date": "2026-07-01",
+    "start_time_utc": "2026-07-01T03:58:33.000Z",
+    "summary": {
+      "lap": "Summary",
+      "tempo": "01:12:42.113",
+      "tempo_in_movimento": "01:12:37.868",
+      "distanza_km": 13.31,
+      "ascesa_m": 69,
+      "discesa_m": 63,
+      "passo_medio": "0:05:27",
+      "passo_medio_in_movimento": "0:05:27",
+      "passo_migliore": "0:04:06",
+      "cadenza_media_pam": 173.5625,
+      "cadenza_max_pam": 188.0,
+      "lunghezza_media_passo": 105.25999755859375,
+      "fc_media_bpm": 154.0,
+      "fc_max_bpm": 173.0,
+      "temperatura_med": 23.95,
+      "calorie": 896
+    }
   }
 ]

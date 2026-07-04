@@ -13691,5 +13691,34 @@
       "temperatura_med": 23.95,
       "calorie": 896
     }
+  },
+  {
+    "activity_id": "23473082376",
+    "year": "2026",
+    "week": "W27",
+    "sport": "cycling",
+    "name": "Ciclismo Z2/Z3",
+    "date": "2026-07-04",
+    "start_time_utc": "2026-07-04T04:53:26.000Z",
+    "summary": {
+      "lap": "Summary",
+      "tempo": "02:53:41.742",
+      "tempo_in_movimento": "02:52:54.771",
+      "distanza_km": 81.27,
+      "ascesa_m": 419,
+      "discesa_m": 402,
+      "velocita_media_kmh": 28.08,
+      "velocita_media_movimento_kmh": 28.2,
+      "velocita_max_kmh": 44.98,
+      "fc_media_bpm": 137.0,
+      "fc_max_bpm": 163.0,
+      "cadenza_pedalata_media_rpm": 84.0,
+      "cadenza_pedalata_max_rpm": 116.0,
+      "potenza_normalizzata": null,
+      "potenza_media": null,
+      "potenza_max": null,
+      "temperatura_med": null,
+      "calorie": 1684
+    }
   }
 ]

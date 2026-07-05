@@ -13720,5 +13720,32 @@
       "temperatura_med": null,
       "calorie": 1684
     }
+  },
+  {
+    "activity_id": "23483606562",
+    "year": "2026",
+    "week": "W27",
+    "sport": "running",
+    "name": "W14 - Long Run 5km@4.55",
+    "date": "2026-07-05",
+    "start_time_utc": "2026-07-05T04:02:24.000Z",
+    "summary": {
+      "lap": "Summary",
+      "tempo": "02:40:29.467",
+      "tempo_in_movimento": "02:40:21.041",
+      "distanza_km": 27.12,
+      "ascesa_m": 121,
+      "discesa_m": 90,
+      "passo_medio": "0:05:55",
+      "passo_medio_in_movimento": "0:05:54",
+      "passo_migliore": "0:04:16",
+      "cadenza_media_pam": 175.203125,
+      "cadenza_max_pam": 186.0,
+      "lunghezza_media_passo": 96.35000000000001,
+      "fc_media_bpm": 146.0,
+      "fc_max_bpm": 170.0,
+      "temperatura_med": 24.53,
+      "calorie": 1816
+    }
   }
 ]

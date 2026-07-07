@@ -13747,5 +13747,56 @@
       "temperatura_med": 24.53,
       "calorie": 1816
     }
+  },
+  {
+    "activity_id": "23502511461",
+    "year": "2026",
+    "week": "W28",
+    "sport": "swimming",
+    "name": "Swim - corso 20",
+    "date": "2026-07-06",
+    "start_time_utc": "2026-07-06T17:47:53.000Z",
+    "summary": {
+      "lap": "Summary",
+      "stile": null,
+      "vasche": 42,
+      "distanza_m": 1050.0,
+      "tempo": "00:44:45.383",
+      "passo_medio": "2:16",
+      "passo_migliore": "0:",
+      "swolf_medio": 44.0,
+      "fc_media_bpm": 115.0,
+      "fc_max_bpm": 162.0,
+      "totale_bracciate": 423,
+      "bracciate_medie": 10.100000381469727,
+      "calorie": 328
+    }
+  },
+  {
+    "activity_id": "23506190446",
+    "year": "2026",
+    "week": "W28",
+    "sport": "running",
+    "name": "W15 - Easy Run",
+    "date": "2026-07-07",
+    "start_time_utc": "2026-07-07T03:58:21.000Z",
+    "summary": {
+      "lap": "Summary",
+      "tempo": "01:30:23.976",
+      "tempo_in_movimento": "01:30:19.600",
+      "distanza_km": 14.21,
+      "ascesa_m": 67,
+      "discesa_m": 94,
+      "passo_medio": "0:06:21",
+      "passo_medio_in_movimento": "0:06:21",
+      "passo_migliore": "0:03:49",
+      "cadenza_media_pam": 173.125,
+      "cadenza_max_pam": 178.0,
+      "lunghezza_media_passo": 90.82000122070313,
+      "fc_media_bpm": 142.0,
+      "fc_max_bpm": 154.0,
+      "temperatura_med": 24.27,
+      "calorie": 988
+    }
   }
 ]

@@ -658,7 +658,7 @@ def main():
         cred = credentials.ApplicationDefault()
         
     if not firebase_admin._apps:
-        firebase_admin.initialize_app(cred, {'projectId': 'running-data-445817'})
+        firebase_admin.initialize_app(cred)
     db = firestore.client()
     
     # 1.c Carica Profilo
@@ -677,12 +677,20 @@ def main():
         print("[ERRORE] Nessuna cartella 'output<ANNO>' trovata.")
         return
 
+    current_year, current_week, _ = date.today().isocalendar()
+
     weeks_to_process = []
     for d in output_dirs:
         year = d.name.replace("output", "")
         for w_dir in sorted(d.iterdir()):
             if w_dir.is_dir() and re.match(r"^W\d+$", w_dir.name):
                 week_num = int(w_dir.name[1:])
+                
+                # Ignora le settimane correnti o future, il report va generato solo a settimana conclusa
+                if int(year) > current_year or (int(year) == current_year and week_num >= current_week):
+                    print(f"[INFO] Salto {year}_{w_dir.name} perche' la settimana non e' ancora conclusa.")
+                    continue
+
                 weeks_to_process.append({
                     "year": year,
                     "year_int": int(year),
@@ -824,7 +832,18 @@ def main():
                 p_tokens = usage.get("promptTokenCount", 0)
                 c_tokens = usage.get("candidatesTokenCount", 0)
                 t_tokens = usage.get("totalTokenCount", 0)
-                print(f"  [STATS] Token — Input: {p_tokens} | Output: {c_tokens} | Totale: {t_tokens}")
+                
+                # Stima del costo (prezzi indicativi per 1M token)
+                if "flash" in model_name.lower():
+                    cost_in = (p_tokens / 1_000_000) * 0.075
+                    cost_out = (c_tokens / 1_000_000) * 0.30
+                else:
+                    # Prezzi standard per modelli Pro
+                    cost_in = (p_tokens / 1_000_000) * 3.50
+                    cost_out = (c_tokens / 1_000_000) * 10.50
+                total_cost = cost_in + cost_out
+
+                print(f"  [STATS] Token — Input: {p_tokens} | Output: {c_tokens} | Totale: {t_tokens} | Costo stimato: ${total_cost:.4f}")
 
                 previous_reports.append({
                     "week_id": week_id,

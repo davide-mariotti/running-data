@@ -54,6 +54,7 @@ CSV_KEY_MAP = {
     "Tempo medio di contatto con il suolo ms":             "contatto_suolo_ms",
     "Media bilanciamento TCS %":                           "bilanciamento_tcs",
     "Lunghezza media passo m":                             "lunghezza_passo_m",
+    "Lunghezza media passo":                               "lunghezza_passo_m",
     "Oscillazione verticale media cm":                     "oscillazione_verticale_cm",
     "Rapporto verticale medio %":                          "rapporto_verticale_pct",
     "Calorie C":                                           "calorie",
@@ -138,7 +139,11 @@ def parse_csv(csv_path: Path, sport: str) -> dict:
             for k, v in row.items():
                 norm_k = normalize_key(k, sport)
                 if norm_k:
-                    record[norm_k] = clean_value(v)
+                    val = clean_value(v)
+                    # Convert cm to meters if Garmin exports without 'm' in header
+                    if norm_k == "lunghezza_passo_m" and isinstance(val, (int, float)) and val > 10:
+                        val = round(val / 100.0, 2)
+                    record[norm_k] = val
             if lap_label.lower() in ["riepilogo", "summary"]:
                 summary = record
             else:

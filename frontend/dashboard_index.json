@@ -13798,5 +13798,32 @@
       "temperatura_med": 24.27,
       "calorie": 988
     }
+  },
+  {
+    "activity_id": "23531326382",
+    "year": "2026",
+    "week": "W28",
+    "sport": "running",
+    "name": "W15 - Reps 12×400m@4.20",
+    "date": "2026-07-09",
+    "start_time_utc": "2026-07-09T04:11:24.000Z",
+    "summary": {
+      "lap": "Summary",
+      "tempo": "01:27:28.383",
+      "tempo_in_movimento": "01:27:19.117",
+      "distanza_km": 15.05,
+      "ascesa_m": 76,
+      "discesa_m": 75,
+      "passo_medio": "0:05:48",
+      "passo_medio_in_movimento": "0:05:48",
+      "passo_migliore": "0:04:13",
+      "cadenza_media_pam": 175.40625,
+      "cadenza_max_pam": 191.0,
+      "lunghezza_media_passo": 98.02999877929688,
+      "fc_media_bpm": 156.0,
+      "fc_max_bpm": 175.0,
+      "temperatura_med": 24.08,
+      "calorie": 1058
+    }
   }
 ]

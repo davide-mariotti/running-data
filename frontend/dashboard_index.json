@@ -13912,5 +13912,29 @@
       "bracciate_medie": 12.399999618530273,
       "calorie": 373
     }
+  },
+  {
+    "activity_id": "23586075947",
+    "year": "2026",
+    "week": "W29",
+    "sport": "swimming",
+    "name": "Piscina",
+    "date": "2026-07-13",
+    "start_time_utc": "2026-07-13T17:48:43.000Z",
+    "summary": {
+      "lap": "Summary",
+      "stile": null,
+      "vasche": 49,
+      "distanza_m": 1225.0,
+      "tempo": "00:40:47.994",
+      "passo_medio": "2:10",
+      "passo_migliore": "0:",
+      "swolf_medio": 44.0,
+      "fc_media_bpm": 121.0,
+      "fc_max_bpm": 163.0,
+      "totale_bracciate": 560,
+      "bracciate_medie": 11.399999618530273,
+      "calorie": 318
+    }
   }
 ]

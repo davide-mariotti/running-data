@@ -13936,5 +13936,56 @@
       "bracciate_medie": 11.399999618530273,
       "calorie": 318
     }
+  },
+  {
+    "activity_id": "23637305222",
+    "year": "2026",
+    "week": "W29",
+    "sport": "swimming",
+    "name": "Piscina",
+    "date": "2026-07-16",
+    "start_time_utc": "2026-07-16T17:03:54.000Z",
+    "summary": {
+      "lap": "Summary",
+      "stile": null,
+      "vasche": 45,
+      "distanza_m": 1125.0,
+      "tempo": "00:44:38.879",
+      "passo_medio": "2:33",
+      "passo_migliore": "0:",
+      "swolf_medio": 52.0,
+      "fc_media_bpm": 126.0,
+      "fc_max_bpm": 164.0,
+      "totale_bracciate": 635,
+      "bracciate_medie": 14.100000381469727,
+      "calorie": 367
+    }
+  },
+  {
+    "activity_id": "23637663385",
+    "year": "2026",
+    "week": "W29",
+    "sport": "running",
+    "name": "W16 - Recovery",
+    "date": "2026-07-18",
+    "start_time_utc": "2026-07-18T05:17:02.000Z",
+    "summary": {
+      "lap": "Summary",
+      "tempo": "00:56:50.887",
+      "tempo_in_movimento": "00:56:47.025",
+      "distanza_km": 10.01,
+      "ascesa_m": 53,
+      "discesa_m": 111,
+      "passo_medio": "0:05:40",
+      "passo_medio_in_movimento": "0:05:40",
+      "passo_migliore": "0:04:46",
+      "cadenza_media_pam": 175.90625,
+      "cadenza_max_pam": 187.0,
+      "lunghezza_passo_m": 1.0,
+      "fc_media_bpm": 159.0,
+      "fc_max_bpm": 174.0,
+      "temperatura_med": 28.21,
+      "calorie": 716
+    }
   }
 ]

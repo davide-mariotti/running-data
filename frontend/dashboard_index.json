@@ -13987,5 +13987,32 @@
       "temperatura_med": 28.21,
       "calorie": 716
     }
+  },
+  {
+    "activity_id": "23649664186",
+    "year": "2026",
+    "week": "W29",
+    "sport": "running",
+    "name": "W16 - Long Run",
+    "date": "2026-07-19",
+    "start_time_utc": "2026-07-19T04:33:56.000Z",
+    "summary": {
+      "lap": "Summary",
+      "tempo": "02:46:00.364",
+      "tempo_in_movimento": "02:45:09.979",
+      "distanza_km": 26.11,
+      "ascesa_m": 97,
+      "discesa_m": 88,
+      "passo_medio": "0:06:21",
+      "passo_medio_in_movimento": "0:06:19",
+      "passo_migliore": "0:05:13",
+      "cadenza_media_pam": 171.375,
+      "cadenza_max_pam": 191.0,
+      "lunghezza_passo_m": 0.92,
+      "fc_media_bpm": 149.0,
+      "fc_max_bpm": 168.0,
+      "temperatura_med": 26.8,
+      "calorie": 1837
+    }
   }
 ]

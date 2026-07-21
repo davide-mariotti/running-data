@@ -14014,5 +14014,56 @@
       "temperatura_med": 26.8,
       "calorie": 1837
     }
+  },
+  {
+    "activity_id": "23668855643",
+    "year": "2026",
+    "week": "W30",
+    "sport": "swimming",
+    "name": "Piscina",
+    "date": "2026-07-20",
+    "start_time_utc": "2026-07-20T17:47:05.000Z",
+    "summary": {
+      "lap": "Summary",
+      "stile": null,
+      "vasche": 47,
+      "distanza_m": 1175.0,
+      "tempo": "00:45:22.296",
+      "passo_medio": "2:11",
+      "passo_migliore": "0:",
+      "swolf_medio": 44.0,
+      "fc_media_bpm": 120.0,
+      "fc_max_bpm": 158.0,
+      "totale_bracciate": 535,
+      "bracciate_medie": 11.399999618530273,
+      "calorie": 343
+    }
+  },
+  {
+    "activity_id": "23672920327",
+    "year": "2026",
+    "week": "W30",
+    "sport": "running",
+    "name": "San Miniato Corsa",
+    "date": "2026-07-21",
+    "start_time_utc": "2026-07-21T04:16:06.000Z",
+    "summary": {
+      "lap": "Summary",
+      "tempo": "01:17:57.434",
+      "tempo_in_movimento": "01:17:53.577",
+      "distanza_km": 12.04,
+      "ascesa_m": 59,
+      "discesa_m": 59,
+      "passo_medio": "0:06:28",
+      "passo_medio_in_movimento": "0:06:28",
+      "passo_migliore": "0:05:22",
+      "cadenza_media_pam": 172.765625,
+      "cadenza_max_pam": 180.0,
+      "lunghezza_passo_m": 0.89,
+      "fc_media_bpm": 147.0,
+      "fc_max_bpm": 155.0,
+      "temperatura_med": 26.08,
+      "calorie": 856
+    }
   }
 ]

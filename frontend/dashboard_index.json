@@ -11880,7 +11880,7 @@
     "year": "2026",
     "week": "W18",
     "sport": "swimming",
-    "name": "Swim - corso 1",
+    "name": "Piscina",
     "date": "2026-04-27",
     "start_time_utc": "2026-04-27T18:37:50.000Z",
     "summary": {
@@ -11984,7 +11984,7 @@
     "year": "2026",
     "week": "W18",
     "sport": "swimming",
-    "name": "Swim - corso 2",
+    "name": "Piscina",
     "date": "2026-04-30",
     "start_time_utc": "2026-04-30T18:37:00.000Z",
     "summary": {
@@ -12140,7 +12140,7 @@
     "year": "2026",
     "week": "W19",
     "sport": "swimming",
-    "name": "Swim - corso 3",
+    "name": "Piscina",
     "date": "2026-05-04",
     "start_time_utc": "2026-05-04T18:35:09.000Z",
     "summary": {
@@ -12204,7 +12204,7 @@
     "year": "2026",
     "week": "W19",
     "sport": "swimming",
-    "name": "Swim - corso 4",
+    "name": "Piscina",
     "date": "2026-05-07",
     "start_time_utc": "2026-05-07T18:35:55.000Z",
     "summary": {
@@ -12308,7 +12308,7 @@
     "year": "2026",
     "week": "W20",
     "sport": "swimming",
-    "name": "Swim - corso 5",
+    "name": "Piscina",
     "date": "2026-05-11",
     "start_time_utc": "2026-05-11T18:33:42.000Z",
     "summary": {
@@ -12412,7 +12412,7 @@
     "year": "2026",
     "week": "W20",
     "sport": "swimming",
-    "name": "Swim - corso 6",
+    "name": "Piscina",
     "date": "2026-05-14",
     "start_time_utc": "2026-05-14T18:34:54.000Z",
     "summary": {
@@ -12542,7 +12542,7 @@
     "year": "2026",
     "week": "W21",
     "sport": "swimming",
-    "name": "Swim - corso 7",
+    "name": "Piscina",
     "date": "2026-05-18",
     "start_time_utc": "2026-05-18T18:34:23.000Z",
     "summary": {
@@ -13075,7 +13075,7 @@
     "year": "2026",
     "week": "W23",
     "sport": "swimming",
-    "name": "Swim - corso 12",
+    "name": "Piscina",
     "date": "2026-06-04",
     "start_time_utc": "2026-06-04T18:33:55.000Z",
     "summary": {
@@ -14064,6 +14064,33 @@
       "fc_max_bpm": 155.0,
       "temperatura_med": 26.08,
       "calorie": 856
+    }
+  },
+  {
+    "activity_id": "23686058699",
+    "year": "2026",
+    "week": "W30",
+    "sport": "running",
+    "name": "W17 - Reps 3×2km@4.40",
+    "date": "2026-07-22",
+    "start_time_utc": "2026-07-22T04:04:41.000Z",
+    "summary": {
+      "lap": "Summary",
+      "tempo": "01:20:15.317",
+      "tempo_in_movimento": "01:20:01.386",
+      "distanza_km": 14.04,
+      "ascesa_m": 68,
+      "discesa_m": 67,
+      "passo_medio": "0:05:42",
+      "passo_medio_in_movimento": "0:05:41",
+      "passo_migliore": "0:03:56",
+      "cadenza_media_pam": 175.171875,
+      "cadenza_max_pam": 189.0,
+      "lunghezza_passo_m": 1.0,
+      "fc_media_bpm": 152.0,
+      "fc_max_bpm": 174.0,
+      "temperatura_med": 24.93,
+      "calorie": 940
     }
   }
 ]

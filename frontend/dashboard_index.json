@@ -14092,5 +14092,29 @@
       "temperatura_med": 24.93,
       "calorie": 940
     }
+  },
+  {
+    "activity_id": "23707152786",
+    "year": "2026",
+    "week": "W30",
+    "sport": "swimming",
+    "name": "Swim - corso 24",
+    "date": "2026-07-23",
+    "start_time_utc": "2026-07-23T17:49:39.000Z",
+    "summary": {
+      "lap": "Summary",
+      "stile": null,
+      "vasche": 47,
+      "distanza_m": 1175.0,
+      "tempo": "00:41:57.993",
+      "passo_medio": "2:24",
+      "passo_migliore": "0:",
+      "swolf_medio": 49.0,
+      "fc_media_bpm": 130.0,
+      "fc_max_bpm": 162.0,
+      "totale_bracciate": 608,
+      "bracciate_medie": 12.899999618530273,
+      "calorie": 371
+    }
   }
 ]

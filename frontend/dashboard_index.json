@@ -14116,5 +14116,29 @@
       "bracciate_medie": 12.899999618530273,
       "calorie": 371
     }
+  },
+  {
+    "activity_id": "23723413121",
+    "year": "2026",
+    "week": "W30",
+    "sport": "swimming",
+    "name": "Castagneto Carducci Nuoto in acque libere",
+    "date": "2026-07-25",
+    "start_time_utc": "2026-07-25T07:45:58.000Z",
+    "summary": {
+      "lap": "Summary",
+      "stile": null,
+      "vasche": 0,
+      "distanza_m": 719.95,
+      "tempo": "00:20:17.970",
+      "passo_medio": "0:28:12",
+      "passo_migliore": "0:14:56",
+      "swolf_medio": 59.0,
+      "fc_media_bpm": 96.0,
+      "fc_max_bpm": 122.0,
+      "totale_bracciate": 471,
+      "bracciate_medie": null,
+      "calorie": 101
+    }
   }
 ]

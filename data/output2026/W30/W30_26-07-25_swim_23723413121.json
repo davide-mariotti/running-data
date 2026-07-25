@@ -1,0 +1,57 @@
+{
+  "week": "W30",
+  "activity_id": "23723413121",
+  "sport": "swimming",
+  "name": "Castagneto Carducci Nuoto in acque libere",
+  "date": "2026-07-25",
+  "start_time_utc": "2026-07-25T07:45:58.000Z",
+  "start_time": "07:45:58",
+  "type": "open_water_swimming",
+  "laps": [
+    {
+      "lap": "REST",
+      "stile": null,
+      "vasche": null,
+      "distanza_m": 500.0,
+      "tempo": "00:13:46.664",
+      "passo_medio": "0:27:32",
+      "passo_migliore": "0:18:09",
+      "swolf_medio": 57.0,
+      "fc_media_bpm": 88.0,
+      "fc_max_bpm": 103.0,
+      "totale_bracciate": 322,
+      "bracciate_medie": null,
+      "calorie": 56
+    },
+    {
+      "lap": "REST",
+      "stile": null,
+      "vasche": null,
+      "distanza_m": 219.95,
+      "tempo": "00:06:31.306",
+      "passo_medio": "0:29:39",
+      "passo_migliore": "0:14:56",
+      "swolf_medio": 61.0,
+      "fc_media_bpm": 111.0,
+      "fc_max_bpm": 122.0,
+      "totale_bracciate": 149,
+      "bracciate_medie": null,
+      "calorie": 45
+    }
+  ],
+  "summary": {
+    "lap": "Summary",
+    "stile": null,
+    "vasche": 0,
+    "distanza_m": 719.95,
+    "tempo": "00:20:17.970",
+    "passo_medio": "0:28:12",
+    "passo_migliore": "0:14:56",
+    "swolf_medio": 59.0,
+    "fc_media_bpm": 96.0,
+    "fc_max_bpm": 122.0,
+    "totale_bracciate": 471,
+    "bracciate_medie": null,
+    "calorie": 101
+  }
+}

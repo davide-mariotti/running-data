@@ -14140,5 +14140,32 @@
       "bracciate_medie": null,
       "calorie": 101
     }
+  },
+  {
+    "activity_id": "23734904735",
+    "year": "2026",
+    "week": "W30",
+    "sport": "running",
+    "name": "W17 - Long Run 7km@5.00 / 3km@5.30",
+    "date": "2026-07-26",
+    "start_time_utc": "2026-07-26T04:33:14.000Z",
+    "summary": {
+      "lap": "Summary",
+      "tempo": "02:54:00.298",
+      "tempo_in_movimento": "02:53:25.544",
+      "distanza_km": 30.13,
+      "ascesa_m": 179,
+      "discesa_m": 170,
+      "passo_medio": "0:05:46",
+      "passo_medio_in_movimento": "0:05:45",
+      "passo_migliore": "0:03:58",
+      "cadenza_media_pam": 174.484375,
+      "cadenza_max_pam": 191.0,
+      "lunghezza_passo_m": 0.99,
+      "fc_media_bpm": 150.0,
+      "fc_max_bpm": 171.0,
+      "temperatura_med": 24.21,
+      "calorie": 2038
+    }
   }
 ]

@@ -14167,5 +14167,56 @@
       "temperatura_med": 24.21,
       "calorie": 2038
     }
+  },
+  {
+    "activity_id": "23753281748",
+    "year": "2026",
+    "week": "W31",
+    "sport": "swimming",
+    "name": "Pisa Nuoto in acque libere",
+    "date": "2026-07-27",
+    "start_time_utc": "2026-07-27T17:24:42.000Z",
+    "summary": {
+      "lap": "Summary",
+      "stile": null,
+      "vasche": 0,
+      "distanza_m": 100.45,
+      "tempo": "00:04:13.621",
+      "passo_medio": "0:42:05",
+      "passo_migliore": "0:21:55",
+      "swolf_medio": 93.0,
+      "fc_media_bpm": 118.0,
+      "fc_max_bpm": 131.0,
+      "totale_bracciate": 122,
+      "bracciate_medie": null,
+      "calorie": 36
+    }
+  },
+  {
+    "activity_id": "23758347242",
+    "year": "2026",
+    "week": "W31",
+    "sport": "running",
+    "name": "W18 - Easy Run",
+    "date": "2026-07-28",
+    "start_time_utc": "2026-07-28T04:03:40.000Z",
+    "summary": {
+      "lap": "Summary",
+      "tempo": "01:34:13.320",
+      "tempo_in_movimento": "01:34:09.777",
+      "distanza_km": 15.11,
+      "ascesa_m": 42,
+      "discesa_m": 147,
+      "passo_medio": "0:06:14",
+      "passo_medio_in_movimento": "0:06:13",
+      "passo_migliore": "0:04:20",
+      "cadenza_media_pam": 172.875,
+      "cadenza_max_pam": 183.0,
+      "lunghezza_passo_m": 0.93,
+      "fc_media_bpm": 146.0,
+      "fc_max_bpm": 155.0,
+      "temperatura_med": 24.76,
+      "calorie": 1047
+    }
   }
 ]

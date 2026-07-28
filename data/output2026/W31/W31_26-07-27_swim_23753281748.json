@@ -1,0 +1,42 @@
+{
+  "week": "W31",
+  "activity_id": "23753281748",
+  "sport": "swimming",
+  "name": "Pisa Nuoto in acque libere",
+  "date": "2026-07-27",
+  "start_time_utc": "2026-07-27T17:24:42.000Z",
+  "start_time": "17:24:42",
+  "type": "open_water_swimming",
+  "laps": [
+    {
+      "lap": "REST",
+      "stile": null,
+      "vasche": null,
+      "distanza_m": 100.45,
+      "tempo": "00:04:13.621",
+      "passo_medio": "0:42:05",
+      "passo_migliore": "0:21:55",
+      "swolf_medio": 93.0,
+      "fc_media_bpm": 118.0,
+      "fc_max_bpm": 131.0,
+      "totale_bracciate": 122,
+      "bracciate_medie": null,
+      "calorie": 36
+    }
+  ],
+  "summary": {
+    "lap": "Summary",
+    "stile": null,
+    "vasche": 0,
+    "distanza_m": 100.45,
+    "tempo": "00:04:13.621",
+    "passo_medio": "0:42:05",
+    "passo_migliore": "0:21:55",
+    "swolf_medio": 93.0,
+    "fc_media_bpm": 118.0,
+    "fc_max_bpm": 131.0,
+    "totale_bracciate": 122,
+    "bracciate_medie": null,
+    "calorie": 36
+  }
+}

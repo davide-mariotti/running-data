@@ -14218,5 +14218,32 @@
       "temperatura_med": 24.76,
       "calorie": 1047
     }
+  },
+  {
+    "activity_id": "23784199154",
+    "year": "2026",
+    "week": "W31",
+    "sport": "running",
+    "name": "W18 - Tempo Run 6km@4.50",
+    "date": "2026-07-30",
+    "start_time_utc": "2026-07-30T04:04:00.000Z",
+    "summary": {
+      "lap": "Summary",
+      "tempo": "01:19:27.653",
+      "tempo_in_movimento": "01:19:20.912",
+      "distanza_km": 14.08,
+      "ascesa_m": 74,
+      "discesa_m": 100,
+      "passo_medio": "0:05:38",
+      "passo_medio_in_movimento": "0:05:38",
+      "passo_migliore": "0:04:24",
+      "cadenza_media_pam": 173.921875,
+      "cadenza_max_pam": 184.0,
+      "lunghezza_passo_m": 1.02,
+      "fc_media_bpm": 155.0,
+      "fc_max_bpm": 174.0,
+      "temperatura_med": 26.4,
+      "calorie": 951
+    }
   }
 ]

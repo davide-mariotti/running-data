@@ -1,0 +1,57 @@
+{
+  "week": "W31",
+  "activity_id": "23792292800",
+  "sport": "swimming",
+  "name": "Cecina Nuoto in acque libere",
+  "date": "2026-07-30",
+  "start_time_utc": "2026-07-30T17:59:10.000Z",
+  "start_time": "17:59:10",
+  "type": "open_water_swimming",
+  "laps": [
+    {
+      "lap": "REST",
+      "stile": null,
+      "vasche": null,
+      "distanza_m": 500.0,
+      "tempo": "00:20:29.323",
+      "passo_medio": "0:40:57",
+      "passo_migliore": "0:14:38",
+      "swolf_medio": 91.0,
+      "fc_media_bpm": 121.0,
+      "fc_max_bpm": 149.0,
+      "totale_bracciate": 582,
+      "bracciate_medie": null,
+      "calorie": 173
+    },
+    {
+      "lap": "REST",
+      "stile": null,
+      "vasche": null,
+      "distanza_m": 203.55,
+      "tempo": "00:10:32.289",
+      "passo_medio": "0:51:45",
+      "passo_migliore": "0:27:03",
+      "swolf_medio": 112.0,
+      "fc_media_bpm": 122.0,
+      "fc_max_bpm": 138.0,
+      "totale_bracciate": 278,
+      "bracciate_medie": null,
+      "calorie": 75
+    }
+  ],
+  "summary": {
+    "lap": "Summary",
+    "stile": null,
+    "vasche": 0,
+    "distanza_m": 703.55,
+    "tempo": "00:31:01.612",
+    "passo_medio": "0:44:05",
+    "passo_migliore": "0:14:38",
+    "swolf_medio": 97.0,
+    "fc_media_bpm": 121.0,
+    "fc_max_bpm": 149.0,
+    "totale_bracciate": 860,
+    "bracciate_medie": null,
+    "calorie": 248
+  }
+}

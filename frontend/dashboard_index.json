@@ -14245,5 +14245,29 @@
       "temperatura_med": 26.4,
       "calorie": 951
     }
+  },
+  {
+    "activity_id": "23792292800",
+    "year": "2026",
+    "week": "W31",
+    "sport": "swimming",
+    "name": "Cecina Nuoto in acque libere",
+    "date": "2026-07-30",
+    "start_time_utc": "2026-07-30T17:59:10.000Z",
+    "summary": {
+      "lap": "Summary",
+      "stile": null,
+      "vasche": 0,
+      "distanza_m": 703.55,
+      "tempo": "00:31:01.612",
+      "passo_medio": "0:44:05",
+      "passo_migliore": "0:14:38",
+      "swolf_medio": 97.0,
+      "fc_media_bpm": 121.0,
+      "fc_max_bpm": 149.0,
+      "totale_bracciate": 860,
+      "bracciate_medie": null,
+      "calorie": 248
+    }
   }
 ]

@@ -14293,5 +14293,32 @@
       "bracciate_medie": null,
       "calorie": 379
     }
+  },
+  {
+    "activity_id": "23819969880",
+    "year": "2026",
+    "week": "W31",
+    "sport": "running",
+    "name": "W18 - Long Run Progressivo",
+    "date": "2026-08-02",
+    "start_time_utc": "2026-08-02T04:12:14.000Z",
+    "summary": {
+      "lap": "Summary",
+      "tempo": "02:39:00.325",
+      "tempo_in_movimento": "02:38:53.139",
+      "distanza_km": 27.15,
+      "ascesa_m": 129,
+      "discesa_m": 94,
+      "passo_medio": "0:05:51",
+      "passo_medio_in_movimento": "0:05:51",
+      "passo_migliore": "0:04:18",
+      "cadenza_media_pam": 172.203125,
+      "cadenza_max_pam": 189.0,
+      "lunghezza_passo_m": 0.99,
+      "fc_media_bpm": 149.0,
+      "fc_max_bpm": 165.0,
+      "temperatura_med": 27.14,
+      "calorie": 1830
+    }
   }
 ]
